@@ -1,0 +1,28 @@
+Señal                n Exactitud Precisión  Sensib.
+peticion_humano      6      1.00      1.00     1.00
+humano_atendido      5      1.00      1.00     1.00
+bucle                6      1.00      1.00     1.00
+resolucion           8      0.50         —        —
+perdida_contexto     3      1.00      1.00     1.00
+queja                3      1.00      1.00     1.00
+radicado             2      0.50      1.00     0.50
+credencial           3      0.33         —     0.00
+coercion             3      0.33         —     0.00
+retencion            2      0.50         —     0.00
+aceptacion           3      1.00      1.00     1.00
+amenaza_externa      4      0.75      0.67     1.00
+
+Exactitud global: 37/48 = 0.77
+
+Errores:
+  r02: resolucion esperado=no_resuelto obtenido=incierto
+  r03: resolucion esperado=en_tramite obtenido=resuelto
+  r03: radicado esperado=True obtenido=False
+  r05: resolucion esperado=no_resuelto obtenido=incierto
+  r06: resolucion esperado=no_resuelto obtenido=incierto
+  s01: credencial esperado=True obtenido=False
+  s03: credencial esperado=True obtenido=False
+  k01: coercion esperado=True obtenido=False
+  k03: coercion esperado=True obtenido=False
+  x01: retencion esperado=True obtenido=False
+  a02: amenaza_externa esperado=False obtenido=True

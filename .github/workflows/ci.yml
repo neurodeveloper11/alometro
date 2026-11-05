@@ -1,0 +1,23 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests eval scripts
+      - run: pytest -q
+      - name: Evaluación de detectores (conjuntos escritos a mano)
+        run: |
+          for f in eval/casos_*.jsonl; do python eval/evaluar.py "$f"; done
+      - name: CRITERIOS.md sincronizado con el código
+        run: |
+          python scripts/generar_criterios_md.py
+          git diff --exit-code CRITERIOS.md

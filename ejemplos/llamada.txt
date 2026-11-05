@@ -1,0 +1,8 @@
+# id: llamada-ejemplo | tipo: cancelacion | canal: voz | sector: telecom
+[00:00] Sistema: Esta llamada puede ser grabada y monitoreada.
+[00:04] Agente: Buenas tardes, le habla Laura de ConectaYa. ¿En qué le puedo ayudar?
+[00:09] Cliente: Quiero cancelar mi plan de internet, por favor.
+[00:13] Agente: Antes de cancelar le puedo ofrecer un descuento del 50 % por seis meses.
+[00:20] Cliente: No, gracias. Ya lo decidí, quiero cancelar.
+[00:25] Agente: Le mejoro la oferta, piénselo.
+[00:30] Cliente: Ya le dije que no. Es la tercera vez que llamo, me tienen cansado.

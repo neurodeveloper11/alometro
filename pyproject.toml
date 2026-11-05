@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "alometro"
+version = "0.1.0"
+description = "Evaluación objetiva y auditable de la calidad de atención en call centers y chatbots (español de Colombia/LatAm)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Fabio Torres (neurodeveloper11)" }]
+keywords = ["call-center", "contact-center", "calidad", "chatbot", "colombia", "cx", "qa", "bpo", "ley-2300"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: Spanish",
+    "Programming Language :: Python :: 3",
+    "Topic :: Communications :: Telephony",
+    "Topic :: Text Processing :: Linguistic",
+]
+dependencies = []
+
+[project.optional-dependencies]
+privacidad = ["datashield-es @ git+https://github.com/neurodeveloper11/pii-shield-es.git"]
+dev = ["pytest>=7", "ruff>=0.5"]
+
+[project.scripts]
+alometro = "alometro.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501", "E731", "E741", "B905"]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/*" = ["E402"]
+"eval/*" = ["E402"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["alometro", "conftest"]
