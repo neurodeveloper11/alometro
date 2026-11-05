@@ -15,7 +15,7 @@ En Colombia, la queja más repetida sobre el servicio al cliente es que *no sirv
 
 ## Qué evalúa
 
-**38 criterios en 6 dimensiones**: Resolución, Esfuerzo del cliente, Trato humano, Asistente virtual, Proceso y guion, y Cumplimiento (Colombia). Incluye **10 errores críticos** que anulan la nota: callejón sin salida, atención humana negada, contención falsa, irrespeto, contacto fuera del horario de la Ley 2300, venta sin retracto o sin aceptación expresa, retención antes de radicar una cancelación, cobranza coercitiva y petición de claves u OTP.
+**39 criterios en 6 dimensiones**: Resolución, Esfuerzo del cliente, Trato humano, Asistente virtual, Proceso y guion, y Cumplimiento (Colombia). Incluye **10 errores críticos** que anulan la nota: callejón sin salida, atención humana negada, contención falsa, irrespeto, contacto fuera del horario de la Ley 2300, venta sin retracto o sin aceptación expresa, retención antes de radicar una cancelación, cobranza coercitiva y petición de claves u OTP.
 
 Sobre el conjunto de interacciones calcula **16 indicadores de resultado**, entre ellos: resolución, recontacto a 7 días, peticiones de humano atendidas, bucles del bot, contención falsa frente a real, pérdida de contexto, desescalada emocional, % libre de errores críticos, esfuerzo y amenazas de queja ante la SIC.
 

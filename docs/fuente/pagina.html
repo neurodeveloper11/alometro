@@ -1,0 +1,591 @@
+<title>Alómetro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: la transcripción anotada es la pieza central; el resto de la página se lee como el informe de un analista de calidad. */
+:root{
+  --paper:#eef2f1; --surface:#fbfcfc; --sunk:#e3e9e7; --ink:#132227; --ink-2:#465a60; --ink-3:#6c7e83; --line:#d3dcda;
+  --signal:#e5a00d; --signal-ink:#7a5200; --signal-wash:#fbefd1;
+  --bad:#c33a2e; --bad-wash:#f8e1dd; --good:#1c7f46; --good-wash:#dcefe3; --link:#0d5f6a;
+  --cliente:#0d5f6a; --empresa:#465a60;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1517; --surface:#152024; --sunk:#1b292e; --ink:#e6eeec; --ink-2:#a8b9b7; --ink-3:#7f9290; --line:#26363b;
+  --signal:#f0b232; --signal-ink:#f5c45a; --signal-wash:#3a2f14;
+  --bad:#ef6a5d; --bad-wash:#3d1f1c; --good:#4cc07c; --good-wash:#173326; --link:#6cc5cf;
+  --cliente:#6cc5cf; --empresa:#a8b9b7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1517; --surface:#152024; --sunk:#1b292e; --ink:#e6eeec; --ink-2:#a8b9b7; --ink-3:#7f9290; --line:#26363b;
+  --signal:#f0b232; --signal-ink:#f5c45a; --signal-wash:#3a2f14;
+  --bad:#ef6a5d; --bad-wash:#3d1f1c; --good:#4cc07c; --good-wash:#173326; --link:#6cc5cf;
+  --cliente:#6cc5cf; --empresa:#a8b9b7; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:4px}
+.envoltura{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-0.01em}
+h2{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:700;line-height:1.12}
+h3{font-size:1.15rem;font-weight:700;line-height:1.25}
+p{margin:0}
+.etiqueta{font:500 .74rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-family:var(--f-mono)}
+.num{font-variant-numeric:tabular-nums}
+section{padding-block:72px 8px}
+.intro{display:grid;gap:12px;max-width:68ch;margin-bottom:32px}
+.intro p{color:var(--ink-2);font-size:1.05rem}
+
+/* Cabecera */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.cabecera{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.cabecera .envoltura{display:flex;align-items:center;gap:20px;padding-block:12px}
+.marca{font:800 1.25rem/1 var(--f-display);color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.marca svg{width:26px;height:16px}
+.nav{display:flex;gap:18px;margin-left:auto;flex-wrap:wrap}
+.nav a{color:var(--ink-2);text-decoration:none;font-size:.92rem}
+.nav a:hover{color:var(--ink)}
+@media (max-width:760px){.nav a:not(.gh){display:none}}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;padding-block:56px 24px;align-items:start}
+@media (max-width:920px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}}
+.hero h1{font-size:clamp(2.6rem,6.4vw,4.6rem);font-weight:800;line-height:.98;letter-spacing:-0.025em}
+.hero h1 em{font-style:normal;color:var(--signal-ink);background:linear-gradient(transparent 62%,var(--signal-wash) 62%)}
+.hero .bajada{font-size:1.18rem;color:var(--ink-2);max-width:52ch;margin-top:20px}
+.acciones{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.boton{display:inline-flex;align-items:center;gap:8px;font:600 .98rem/1 var(--f-body);padding:13px 18px;border-radius:999px;text-decoration:none;border:1px solid var(--ink);cursor:pointer}
+.boton.primario{background:var(--ink);color:var(--paper)}
+.boton.secundario{background:transparent;color:var(--ink)}
+.boton:hover{transform:translateY(-1px)}
+.cifras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:40px;border-top:1px solid var(--line)}
+.cifras div{padding:14px 12px 0 0}
+.cifras b{display:block;font:800 1.9rem/1 var(--f-display)}
+.cifras span{font-size:.86rem;color:var(--ink-2)}
+@media (max-width:520px){.cifras{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}}
+
+/* Medidor */
+.medidor{display:grid;justify-items:center;gap:2px}
+.medidor svg{width:100%;max-width:260px;height:auto;overflow:visible}
+.medidor .valor{font:800 2.6rem/1 var(--f-display)}
+.medidor .nivel{font:600 .85rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.nivel.critico{background:var(--bad-wash);color:var(--bad)}
+.nivel.bueno{background:var(--good-wash);color:var(--good)}
+.nivel.medio{background:var(--signal-wash);color:var(--signal-ink)}
+
+/* Transcripción */
+.tarjeta{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.transcripcion{display:grid}
+.turno{display:grid;grid-template-columns:2.4rem 4.6rem minmax(0,1fr);gap:10px;padding:10px 14px;border-top:1px solid var(--line);align-items:start}
+.turno:first-child{border-top:0}
+.turno .n{font:500 .78rem/1.9 var(--f-mono);color:var(--ink-3)}
+.turno .rol{font:500 .78rem/1.9 var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--empresa)}
+.turno.cliente .rol{color:var(--cliente)}
+.turno .txt{min-width:0;overflow-wrap:anywhere}
+.turno.cliente .txt{font-weight:500}
+.turno.marcado{background:color-mix(in srgb,var(--bad-wash) 55%,transparent)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.chip{font:500 .72rem/1 var(--f-mono);padding:4px 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);cursor:help}
+.chip.falla{border-color:var(--bad);color:var(--bad);background:var(--bad-wash)}
+.chip.ok{border-color:color-mix(in srgb,var(--good) 55%,var(--line));color:var(--good)}
+@media (max-width:520px){.turno{grid-template-columns:2rem minmax(0,1fr)}.turno .rol{grid-column:2}.turno .txt{grid-column:2}}
+.hero-panel{display:grid;gap:14px}
+.hero-panel .cabeza{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.hero-panel .resultado{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;padding:16px}
+@media (max-width:520px){.hero-panel .resultado{grid-template-columns:minmax(0,1fr)}}
+.lista-criticos{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.lista-criticos li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:.92rem;line-height:1.4}
+.lista-criticos b{font-family:var(--f-mono);font-size:.78rem;color:var(--bad);padding-top:2px}
+
+/* Problema */
+.datos-grandes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.datos-grandes>div{padding:20px 20px 4px 0;display:grid;gap:8px;align-content:start}
+.datos-grandes .cifra{font:800 clamp(2.4rem,5vw,3.4rem)/1 var(--f-display);letter-spacing:-0.02em}
+.datos-grandes p{color:var(--ink-2);font-size:.95rem}
+.fuente{font-size:.8rem;color:var(--ink-3)}
+@media (max-width:860px){.datos-grandes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.datos-grandes{grid-template-columns:minmax(0,1fr)}}
+.problemas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:40px}
+@media (max-width:760px){.problemas{grid-template-columns:minmax(0,1fr)}}
+.problema{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px 0;border-top:1px solid var(--line);align-items:baseline}
+.problema .ids{font:500 .78rem/1 var(--f-mono);color:var(--ink-3);white-space:nowrap}
+
+/* Operaciones */
+.tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.tres{grid-template-columns:minmax(0,1fr)}}
+.tres .tarjeta{padding:22px;display:grid;gap:12px;align-content:start}
+.tres ul{margin:0;padding-left:1.1em;color:var(--ink-2);display:grid;gap:6px}
+
+/* Pasos */
+.pasos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:paso}
+@media (max-width:900px){.pasos{grid-template-columns:minmax(0,1fr)}}
+.paso{padding:18px 18px 18px 0;border-top:2px solid var(--ink);display:grid;gap:8px;align-content:start}
+.paso::before{counter-increment:paso;content:counter(paso,decimal-leading-zero);font:500 .8rem/1 var(--f-mono);color:var(--signal-ink)}
+.paso p{color:var(--ink-2);font-size:.95rem}
+
+/* Demo */
+.selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.selector button{font:500 .9rem/1.2 var(--f-body);padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.selector button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.demo{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.demo{grid-template-columns:minmax(0,1fr)}}
+.demo .lateral{display:grid;gap:16px}
+.demo .bloque{padding:18px;display:grid;gap:12px}
+.dims{display:grid;gap:10px}
+.dim{display:grid;grid-template-columns:9.5rem minmax(0,1fr) 2.6rem;gap:10px;align-items:center;font-size:.9rem}
+.barra{height:8px;border-radius:4px;background:var(--sunk);position:relative;overflow:hidden}
+.barra i{position:absolute;inset:0 auto 0 0;border-radius:4px;background:var(--ink-2)}
+.recs{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink-2);font-size:.93rem}
+.meta-conv{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.86rem;color:var(--ink-3)}
+.vivo{margin-top:24px;padding:20px;display:grid;gap:12px}
+.vivo textarea{width:100%;min-height:180px;font:400 .9rem/1.5 var(--f-mono);padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);resize:vertical}
+.vivo .fila{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.estado{font-size:.9rem;color:var(--ink-2)}
+
+/* Criterios */
+.dimensiones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.dimensiones{grid-template-columns:minmax(0,1fr)}}
+.dimensiones .tarjeta{padding:6px 18px 10px}
+.dimensiones h3{padding:14px 0 6px}
+details.crit{border-top:1px solid var(--line)}
+details.crit summary{display:grid;grid-template-columns:2.8rem minmax(0,1fr) auto;gap:10px;padding:10px 0;cursor:pointer;list-style:none;align-items:baseline}
+details.crit summary::-webkit-details-marker{display:none}
+details.crit summary .id{font:500 .8rem/1 var(--f-mono);color:var(--ink-3)}
+details.crit .peso{font:500 .76rem/1 var(--f-mono);color:var(--ink-2);white-space:nowrap}
+details.crit .peso.critico{color:var(--bad)}
+details.crit .cuerpo{padding:0 0 12px 3.4rem;display:grid;gap:6px;font-size:.92rem;color:var(--ink-2)}
+@media (max-width:520px){details.crit .cuerpo{padding-left:0}}
+
+/* Verificación */
+.tabla-env{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .74rem/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+#tabla-comparacion{min-width:720px}
+@media (max-width:600px){#tabla-comparacion{min-width:560px}#tabla-comparacion td .nota{display:none}}
+.veredicto{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;white-space:nowrap}
+.veredicto i{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.veredicto.mejora i{background:var(--good)}.veredicto.empeora i{background:var(--bad)}
+.dos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:860px){.dos{grid-template-columns:minmax(0,1fr)}}
+.dos .tarjeta{padding:20px;display:grid;gap:12px;align-content:start}
+.contencion{display:grid;gap:12px}
+.contencion .fila{display:grid;grid-template-columns:5.5rem minmax(0,1fr) 3.4rem;gap:10px;align-items:center;font-size:.9rem}
+.contencion .barra i.aparente{background:var(--ink-3)}
+.contencion .barra i.real{background:var(--good)}
+.nota{font-size:.86rem;color:var(--ink-3)}
+ol.pasos-ver{margin:0;padding-left:1.2em;display:grid;gap:8px;color:var(--ink-2)}
+
+/* Instalar */
+pre{margin:0;overflow-x:auto;background:var(--ink);color:var(--paper);padding:16px;border-radius:var(--r);font:400 .86rem/1.6 var(--f-mono)}
+.instalar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.instalar{grid-template-columns:minmax(0,1fr)}}
+.garantias{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.garantias li{padding-left:22px;position:relative;color:var(--ink-2)}
+.garantias li::before{content:"";position:absolute;left:0;top:.6em;width:10px;height:2px;background:var(--signal)}
+footer{margin-top:80px;border-top:1px solid var(--line);padding-block:28px 48px;color:var(--ink-3);font-size:.88rem}
+footer .envoltura{display:grid;gap:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.boton:hover{transform:none}}
+.aguja{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+</style>
+<!--CUERPO-->
+<header class="cabecera">
+  <div class="envoltura">
+    <a class="marca" href="#inicio" aria-label="Alómetro, inicio">
+      <svg viewBox="0 0 26 16" aria-hidden="true"><path d="M2 15a11 11 0 0 1 22 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M13 15 19 6" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round"/></svg>
+      Alómetro
+    </a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#problema">Problema</a><a href="#como">Cómo funciona</a><a href="#probar">Probar</a><a href="#criterios">Criterios</a><a href="#verificar">Verificación</a>
+      <a class="gh" href="https://github.com/neurodeveloper11/alometro">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <div class="envoltura">
+    <div class="hero">
+      <div>
+        <p class="etiqueta">Calidad de atención · Colombia y Latinoamérica</p>
+        <h1 style="margin-top:14px">Mide si tu servicio al cliente <em>de verdad ayuda</em>.</h1>
+        <p class="bajada">Alómetro lee cada llamada, chat y conversación con bot, y responde con evidencia: ¿se resolvió?, ¿cuánto le costó al cliente?, ¿pudo hablar con una persona?, ¿salió más tranquilo o más bravo?, ¿se cumplió la ley?</p>
+        <div class="acciones">
+          <a class="boton primario" href="#probar">Ver una evaluación</a>
+          <a class="boton secundario" href="#criterios">Leer los criterios</a>
+        </div>
+        <div class="cifras" id="cifras"></div>
+      </div>
+      <div class="tarjeta hero-panel" id="hero-panel" aria-label="Ejemplo de evaluación"></div>
+    </div>
+  </div>
+
+  <section id="problema">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">El problema</p>
+        <h2>«Quiero hablar con una persona.»</h2>
+        <p>Es lo que más temen los clientes cuando una empresa pone un bot a atender: en la encuesta de Gartner, el 60 % teme que la IA le impida llegar a una persona. Las métricas de siempre (tiempo de atención, contención del bot) no la ven: un bot que nunca deja salir al cliente parece eficiente en el tablero y es un fracaso para la persona.</p>
+      </div>
+      <div class="datos-grandes">
+        <div><b class="num cifra">64 %</b><p>de los clientes preferiría que las empresas no usaran IA en el servicio al cliente. Su principal temor: no poder llegar a una persona.</p><a class="fuente" href="https://www.gartner.com/en/newsroom/press-releases/2024-07-09-gartner-survey-finds-64-percent-of-customers-would-prefer-that-companies-didnt-use-ai-for-customer-service">Gartner, 2024 · 5.728 clientes</a></div>
+        <div><b class="num cifra">39 %</b><p>de los colombianos que abandonan los chatbots bancarios lo hace porque prefiere la atención humana; es el motivo más citado.</p><a class="fuente" href="https://www.descubre.vc/noticia/delto-estudio-revela-por-qu-los-colombianos-abandonan-los-chatbots-bancarios-2025-08-11">Estudio Delto, 2025</a></div>
+        <div><b class="num cifra">63 %</b><p>valora por encima de todo que el bot lo pase a una persona <b>sin perder el contexto</b>, sin volver a dictar la cédula.</p><a class="fuente" href="https://www.descubre.vc/noticia/delto-estudio-revela-por-qu-los-colombianos-abandonan-los-chatbots-bancarios-2025-08-11">Estudio Delto, 2025</a></div>
+        <div><b class="num cifra">2,01 M</b><p>quejas por servicios de telecomunicaciones en Colombia en solo el segundo semestre de 2024.</p><a class="fuente" href="https://dplnews.com/colombia-quejas-por-servicios-de-telecomunicaciones-cayeron-un-267-en-el-segundo-semestre-de-2024-crc/">CRC vía DPL News</a></div>
+      </div>
+      <div class="problemas" id="problemas"></div>
+    </div>
+  </section>
+
+  <section id="operaciones">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Para las tres caras del call center</p>
+        <h2>Ventas, clientes actuales y soporte se miden distinto.</h2>
+        <p>Cada criterio declara cuándo aplica. Una venta no se evalúa como una cancelación, y una conversación solo con bot no se evalúa como una llamada con una asesora.</p>
+      </div>
+      <div class="tres">
+        <div class="tarjeta"><p class="etiqueta">Ventas y telemercadeo</p><h3>Vender sin acosar</h3><ul><li>Horario legal de la Ley 2300 y alertas de frecuencia por cliente</li><li>Precio, permanencia y derecho de retracto informados</li><li>Aceptación expresa: «como sea» no es un sí</li><li>Respeto del «no» del cliente</li><li>Autorización de datos (Ley 1581)</li></ul></div>
+        <div class="tarjeta"><p class="etiqueta">Clientes actuales</p><h3>Servicio, retención, cancelación y cobranza</h3><ul><li>Cancelar sin trabas: radicar primero, ofertas después</li><li>Cobranza sin amenazas, sin terceros, sin visitas</li><li>Verificación de identidad antes de dar saldos</li><li>Nunca pedir claves, PIN ni códigos OTP</li><li>Resolución o radicado con plazo</li></ul></div>
+        <div class="tarjeta"><p class="etiqueta">Soporte, PQR y bots</p><h3>Que el cliente salga resuelto</h3><ul><li>Salida a una persona cuando la pide</li><li>Bucles del bot y contención falsa</li><li>Traspaso con contexto, sin repetir datos</li><li>Transferencias, esperas y desvíos a otros canales</li><li>Emoción del cliente al inicio y al final</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Cómo funciona</p>
+        <h2>Reglas explícitas, evidencia citada, nada sale del equipo.</h2>
+        <p>Sin modelos opacos ni APIs externas: cada conclusión apunta al turno y a la frase que la respalda, para que un analista de calidad pueda auditarla en segundos.</p>
+      </div>
+      <div class="pasos">
+        <div class="paso"><h3>Transcripciones</h3><p>Llamadas transcritas, chats o WhatsApp en JSONL, CSV o texto. Roles: cliente, agente, bot y sistema.</p></div>
+        <div class="paso"><h3>Anonimización</h3><p>Cédulas, teléfonos, correos, tarjetas y direcciones se ocultan en las evidencias. Los radicados se conservan.</p></div>
+        <div class="paso"><h3>Señales con evidencia</h3><p>Petición de humano, bucles, datos repetidos, frustración por turno, resolución, radicados, ofertas, amenazas.</p></div>
+        <div class="paso"><h3>Rúbrica</h3><p id="paso-rubrica">Criterios en seis dimensiones y errores críticos que anulan la nota.</p></div>
+        <div class="paso"><h3>Indicadores</h3><p>Metas con intervalo de confianza, recontacto a 7 días y comparación antes/después con significancia.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="probar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Evaluaciones reales del motor</p>
+        <h2>Elige una conversación y mira qué encuentra.</h2>
+        <p>Son conversaciones sintéticas que reproducen problemas frecuentes en Colombia. Los resultados los calculó el motor de Alómetro, no están escritos a mano. Pasa el cursor sobre una etiqueta para ver el criterio.</p>
+      </div>
+      <div class="selector" id="selector" role="group" aria-label="Conversaciones de ejemplo"></div>
+      <div class="demo">
+        <div class="tarjeta">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:4px">
+            <h3 id="demo-titulo"></h3>
+            <div class="meta-conv" id="demo-meta"></div>
+          </div>
+          <div class="transcripcion" id="demo-transcripcion"></div>
+        </div>
+        <div class="lateral">
+          <div class="tarjeta bloque"><div class="medidor" id="demo-medidor"></div><ul class="lista-criticos" id="demo-criticos"></ul></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Por dimensión</p><div class="dims" id="demo-dims"></div></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Qué mejorar primero</p><ol class="recs" id="demo-recs"></ol></div>
+        </div>
+      </div>
+      <div class="tarjeta vivo" id="vivo">
+        <h3>Evalúa tu propia conversación</h3>
+        <p class="estado" id="vivo-intro"></p>
+        <label for="vivo-texto" class="etiqueta">Transcripción (una línea por turno: «Rol: texto»)</label>
+        <textarea id="vivo-texto" spellcheck="false"># tipo: servicio | canal: chat | sector: financiero
+Bot: Hola, soy el asistente virtual. ¿En qué te ayudo?
+Cliente: Necesito hablar con un asesor, me hicieron un cobro que no reconozco
+Bot: Para ayudarte escribe tu número de cédula
+Cliente: 1020304050
+Bot: Te comunico con un asesor
+Agente: Buenas tardes, me regala su número de cédula por favor
+Cliente: otra vez?? ya se la di al bot</textarea>
+        <div class="fila"><button class="boton primario" id="vivo-boton" type="button">Evaluar con el motor</button><span class="estado" id="vivo-estado" role="status"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="criterios">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">La rúbrica completa</p>
+        <h2 id="criterios-titulo">Criterios objetivos de revisión</h2>
+        <p>La nota es 100 × puntos cumplidos / puntos que aplican: lo que no aplica no suma ni resta. Los errores críticos se miden aparte, en tres categorías (cliente, negocio y cumplimiento), y anulan la nota de la interacción, como en los modelos de calidad COPC.</p>
+      </div>
+      <div class="dimensiones" id="dimensiones"></div>
+    </div>
+  </section>
+
+  <section id="verificar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Criterios de éxito</p>
+        <h2>¿Cómo saber si la operación está mejorando de verdad?</h2>
+        <p>Alómetro no se queda en la nota. Calcula indicadores de resultado con meta e intervalo de confianza del 95 %, y compara periodos para separar la mejora real del ruido. Las metas son puntos de partida: fíjelas con cuatro semanas de línea base.</p>
+      </div>
+      <div class="tabla-env"><table id="tabla-comparacion"></table></div>
+      <p class="nota" id="nota-comparacion" style="margin-top:10px"></p>
+      <div class="dos">
+        <div class="tarjeta"><p class="etiqueta">Contención del bot</p><h3>Aparente contra real</h3><p style="color:var(--ink-2)">Un bot que nunca transfiere tiene «contención» alta. Alómetro solo cuenta como contenida la conversación que el bot resolvió y que no volvió por otro canal en 7 días.</p><div class="contencion" id="contencion"></div></div>
+        <div class="tarjeta"><p class="etiqueta">¿Mide bien la herramienta?</p><h3>Precisión publicada con honestidad</h3><p style="color:var(--ink-2)">Los detectores se prueban con conversaciones escritas a mano, con redacciones distintas a las de la demo. La cifra que vale es la del conjunto ciego, medido antes de ajustar las reglas.</p><div class="tabla-env"><table id="tabla-precision"></table></div>
+          <ol class="pasos-ver"><li>Calibración: dos analistas califican 50 o más interacciones y <span class="mono">alometro calibrar</span> mide el acuerdo (kappa). Solo los criterios con κ ≥ 0,60 se usan para decisiones.</li><li>Validez: el puntaje debe correlacionar con la encuesta CSAT, y lo «resuelto» debe tener menos recontacto que lo «no resuelto».</li></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Uso</p>
+        <h2>Un comando, un informe.</h2>
+      </div>
+      <div class="instalar">
+        <pre><code>pip install "git+https://github.com/neurodeveloper11/alometro.git"
+
+alometro demo
+alometro evaluar llamadas.jsonl -o informe.html --csv notas.csv
+alometro comparar septiembre.jsonl octubre.jsonl
+alometro calibrar llamadas.jsonl etiquetas_analistas.csv</code></pre>
+        <ul class="garantias">
+          <li><b>100 % local.</b> No envía transcripciones a internet ni usa APIs de terceros. Corre en un portátil, en un servidor de la empresa o en el navegador.</li>
+          <li><b>Sin dependencias.</b> Python 3.10 o superior y nada más.</li>
+          <li><b>Auditable.</b> Cada hallazgo cita turno y frase; las evidencias se anonimizan.</li>
+          <li><b>Hecho para Colombia.</b> Festivos de la Ley Emiliani, Ley 2300, Estatuto del Consumidor, Habeas Data y reglas de la CRC.</li>
+          <li><b>Aviso.</b> Es una ayuda para los equipos de calidad: no reemplaza la revisión humana ni la asesoría jurídica.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="envoltura">
+    <p>Alómetro <span id="version"></span> · Licencia MIT · Creado por <a href="https://www.linkedin.com/in/fabio-torres-39364b258">Fabio Torres</a>, ingeniero de datos y psicólogo organizacional.</p>
+    <p>Las cifras de la sección «El problema» son de las fuentes enlazadas. Los ejemplos y la comparación antes/después usan datos sintéticos; empresas y personas son ficticias.</p>
+  </div>
+</footer>
+
+<script>
+const DATOS = /*__DATOS__*/null;
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const pct = (x, d = 0) => x == null ? "—" : (100 * x).toFixed(d).replace(".", ",") + " %";
+const CRIT = Object.fromEntries(DATOS.criterios.map((c) => [c.id, c]));
+const ROLES = {cliente: "Cliente", agente: "Agente", bot: "Bot", sistema: "Sistema"};
+
+function nivelClase(n) { return n === "Crítico" || n === "Deficiente" ? "critico" : n === "Mejorable" ? "medio" : "bueno"; }
+
+function medidor(puntaje, base, nivel) {
+  const ang = -90 + 180 * Math.max(0, Math.min(100, puntaje)) / 100;
+  const arco = (a0, a1, color) => {
+    const p = (a) => [100 + 80 * Math.cos((a - 180) * Math.PI / 180), 100 + 80 * Math.sin((a - 180) * Math.PI / 180)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A80 80 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}" fill="none" stroke="${color}" stroke-width="14"/>`;
+  };
+  const marcas = [0, 60, 75, 90, 100].map((v) => {
+    const a = (v / 100) * 180 - 180, r = a * Math.PI / 180;
+    const x = 100 + 100 * Math.cos(r), y = 100 + 100 * Math.sin(r);
+    return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink-3)">${v}</text>`;
+  }).join("");
+  const nota = base !== puntaje ? `<span class="nota">Nota base ${base} · anulada por error crítico</span>` : `<span class="nota">Nota de calidad sobre 100</span>`;
+  return `<svg viewBox="-12 0 224 118" role="img" aria-label="Puntaje ${puntaje} de 100, nivel ${esc(nivel)}">
+      ${arco(0, 108, "var(--bad-wash)")}${arco(108, 135, "var(--signal-wash)")}${arco(135, 162, "var(--good-wash)")}${arco(162, 180, "var(--good)")}
+      ${marcas}
+      <g class="aguja" style="transform-origin:100px 100px;transform:rotate(${ang}deg)"><line x1="100" y1="100" x2="100" y2="30" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/><line x1="100" y1="58" x2="100" y2="30" stroke="var(--signal)" stroke-width="3.5" stroke-linecap="round"/></g>
+      <circle cx="100" cy="100" r="7" fill="var(--ink)"/>
+    </svg>
+    <div class="valor num">${puntaje}</div><span class="nivel ${nivelClase(nivel)}">${esc(nivel)}</span>${nota}`;
+}
+
+function transcripcion(ej, maxTurnos) {
+  const turnos = maxTurnos ? ej.turnos.slice(0, maxTurnos) : ej.turnos;
+  return turnos.map((t, i) => {
+    const anot = (ej.anotaciones[i + 1] || []);
+    const falla = anot.some((a) => a.cumple === false);
+    const chips = anot.map((a) => {
+      const c = CRIT[a.id];
+      const titulo = `${a.id} · ${c ? c.nombre : ""}${a.cumple === false ? " · falla" : " · cumple"}`;
+      return `<span class="chip ${a.cumple === false ? "falla" : "ok"}" title="${esc(titulo)}">${a.cumple === false ? "✕" : "✓"} ${esc(a.id)}</span>`;
+    }).join("");
+    return `<div class="turno ${t.rol === "cliente" ? "cliente" : ""} ${falla ? "marcado" : ""}">
+      <span class="n">T${i + 1}</span><span class="rol">${ROLES[t.rol] || esc(t.rol)}</span>
+      <div class="txt">${esc(t.texto)}${chips ? `<div class="chips">${chips}</div>` : ""}</div></div>`;
+  }).join("");
+}
+
+function listaCriticos(ej) {
+  if (!ej.criticos.length) return `<li><b style="color:var(--good)">OK</b><span>Sin errores críticos.</span></li>`;
+  return ej.criticos.map((c) => `<li><b>${esc(c.id)}</b><span><strong>${esc(c.nombre)}</strong> (${esc(c.categoria)}). ${esc(c.detalle)}</span></li>`).join("");
+}
+
+function pintarHero() {
+  const n = DATOS.criterios.length, k = DATOS.criterios.filter((c) => c.critico).length;
+  $("#cifras").innerHTML = `<div><b class="num">${n}</b><span>criterios de revisión</span></div><div><b class="num">${k}</b><span>errores críticos</span></div>
+    <div><b class="num">${DATOS.indicadores.length}</b><span>indicadores con meta</span></div><div><b>0</b><span>datos enviados a internet</span></div>`;
+  $("#paso-rubrica").textContent = `${n} criterios en seis dimensiones y ${k} errores críticos que anulan la nota.`;
+  $("#criterios-titulo").textContent = `${n} criterios objetivos de revisión`;
+  const ej = DATOS.ejemplos[0];
+  $("#hero-panel").innerHTML = `<div class="cabeza"><span class="etiqueta">${esc(ej.contexto)}</span><span class="etiqueta">${esc(ej.fecha)}</span></div>
+    <div class="transcripcion">${transcripcion(ej, 8)}</div>
+    <div class="resultado" style="border-top:1px solid var(--line)"><div class="medidor">${medidor(ej.puntaje, ej.base, ej.nivel)}</div><ul class="lista-criticos">${listaCriticos(ej)}</ul></div>`;
+}
+
+const PROBLEMAS = [
+  ["El bot no deja llegar a una persona", "B2 · B2C · I03"], ["Bucles: «no te entendí» una y otra vez", "B3 · I05"],
+  ["Contención falsa: el cliente se rinde y vuelve por otro canal", "B5 · I06"], ["Volver a dictar la cédula tras el traspaso", "E2 · B4 · I07"],
+  ["«Llame más tarde», «eso no es conmigo», «vaya a una oficina»", "R1 · R3 · E3"], ["Parecía resuelto, pero el cliente vuelve", "I02"],
+  ["Cancelaciones con ofertas en vez de radicar", "L7"], ["Llamadas de venta y cobranza a cualquier hora", "L1 · alertas"],
+  ["Cobranza con amenazas o llamadas a la familia", "L8"], ["Pedir claves o códigos: la puerta del fraude", "L9"],
+  ["Nadie reconoce la molestia del cliente", "T1 · T6"], ["Agentes que absorben insultos sin apoyo", "carga emocional"],
+];
+
+function pintarProblemas() {
+  $("#problemas").innerHTML = PROBLEMAS.map(([p, ids]) => `<div class="problema"><span>${esc(p)}</span><span class="ids">${esc(ids)}</span></div>`).join("");
+}
+
+let actual = 0;
+function pintarDemo(i) {
+  actual = i;
+  const ej = DATOS.ejemplos[i];
+  document.querySelectorAll("#selector button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+  mostrarEvaluacion(ej);
+}
+
+function mostrarEvaluacion(ej) {
+  $("#demo-titulo").textContent = ej.titulo;
+  const s = ej.senales;
+  const res = {resuelto: "resuelto", en_tramite: "en trámite", no_resuelto: "no resuelto", incierto: "sin evidencia de resolución"}[s.resolucion] || s.resolucion;
+  $("#demo-meta").innerHTML = [ej.contexto, ej.fecha, `Resolución: ${res}`, `Emoción: ${s.trayectoria_emocional}`, `Esfuerzo: ${s.esfuerzo}/10`]
+    .filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("");
+  $("#demo-transcripcion").innerHTML = transcripcion(ej);
+  $("#demo-medidor").innerHTML = medidor(ej.puntaje, ej.base, ej.nivel);
+  $("#demo-criticos").innerHTML = listaCriticos(ej);
+  $("#demo-dims").innerHTML = Object.entries(DATOS.dimensiones).map(([k, nombre]) => {
+    const v = ej.dimensiones[k];
+    return `<div class="dim"><span>${esc(nombre)}</span><div class="barra" title="${esc(nombre)}: ${v == null ? "no aplica" : v + " de 100"}"><i style="width:${v ?? 0}%"></i></div><span class="num" style="text-align:right">${v == null ? "—" : v}</span></div>`;
+  }).join("");
+  $("#demo-recs").innerHTML = ej.recomendaciones.length ? ej.recomendaciones.map((r) => `<li>${esc(r)}</li>`).join("") : "<li>Nada que corregir en esta conversación.</li>";
+}
+
+function pintarSelector() {
+  $("#selector").innerHTML = DATOS.ejemplos.map((e, i) => `<button type="button" aria-pressed="false" data-i="${i}">${esc(e.titulo)}</button>`).join("");
+  $("#selector").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) pintarDemo(+b.dataset.i); });
+}
+
+function pintarCriterios() {
+  $("#dimensiones").innerHTML = Object.entries(DATOS.dimensiones).map(([k, nombre]) => {
+    const cs = DATOS.criterios.filter((c) => c.dimension === k);
+    return `<div class="tarjeta"><h3>${esc(nombre)} <span class="etiqueta" style="margin-left:6px">${cs.length} criterios</span></h3>${cs.map((c) => `
+      <details class="crit"><summary><span class="id">${esc(c.id)}</span><span>${esc(c.nombre)}</span>
+      <span class="peso ${c.critico ? "critico" : ""}">${c.critico ? "crítico · " + esc(c.critico) : c.peso + " pts"}</span></summary>
+      <div class="cuerpo"><p><b>Qué hacer si falla:</b> ${esc(c.recomendacion)}</p><p><b>Fundamento:</b> ${esc(c.fundamento)}</p></div></details>`).join("")}</div>`;
+  }).join("");
+}
+
+function fmtValor(v, u) { return v == null ? "—" : u === "%" ? pct(v, 1) : v.toFixed(1).replace(".", ","); }
+
+function pintarVerificacion() {
+  const ind = Object.fromEntries(DATOS.indicadores.map((i) => [i.id, i]));
+  const filas = DATOS.comparacion.map((f) => {
+    const i = ind[f.id];
+    const meta = (i.sentido === "mayor" ? "≥ " : "≤ ") + (i.unidad === "%" ? pct(i.meta) : String(i.meta).replace(".", ","));
+    const dif = f.diferencia == null ? "—" : (f.unidad === "%" ? (f.diferencia >= 0 ? "+" : "−") + Math.abs(100 * f.diferencia).toFixed(1).replace(".", ",") + " pp" : (f.diferencia >= 0 ? "+" : "−") + Math.abs(f.diferencia).toFixed(1).replace(".", ","));
+    const cls = f.veredicto.startsWith("mejora") ? "mejora" : f.veredicto.startsWith("empeora") ? "empeora" : "";
+    return `<tr><td><b>${esc(f.nombre)}</b><br><span class="nota">${esc(i.formula)}</span></td><td class="num">${meta}</td>
+      <td class="num">${fmtValor(f.antes, f.unidad)}</td><td class="num">${fmtValor(f.despues, f.unidad)}</td><td class="num">${dif}</td>
+      <td><span class="veredicto ${cls}"><i></i>${esc(f.veredicto)}</span></td></tr>`;
+  }).join("");
+  $("#tabla-comparacion").innerHTML = `<thead><tr><th>Indicador</th><th>Meta</th><th>Antes</th><th>Después</th><th>Cambio</th><th>Veredicto (IC 95 %)</th></tr></thead><tbody>${filas}</tbody>`;
+  $("#nota-comparacion").textContent = `Ejemplo con datos sintéticos: ${DATOS.n_antes} conversaciones de una operación típica frente a ${DATOS.n_despues} de la misma operación tras aplicar las recomendaciones. Así se ve la salida de «alometro comparar».`;
+  const c = DATOS.contencion;
+  const fila = (et, v, cls) => `<div class="fila"><span>${et}</span><div class="barra"><i class="${cls}" style="width:${(v ?? 0) * 100}%"></i></div><span class="num" style="text-align:right">${pct(v)}</span></div>`;
+  $("#contencion").innerHTML = `<p class="etiqueta">Antes</p>${fila("Aparente", c.antes.contencion_bruta, "aparente")}${fila("Real", c.antes.contencion_real, "real")}
+    <p class="etiqueta" style="margin-top:6px">Después</p>${fila("Aparente", c.despues.contencion_bruta, "aparente")}${fila("Real", c.despues.contencion_real, "real")}`;
+  $("#tabla-precision").innerHTML = `<thead><tr><th>Conjunto</th><th>Señales</th><th>Exactitud</th></tr></thead><tbody>${DATOS.evaluacion.map((e) =>
+    `<tr><td><b>${esc(e.conjunto)}</b><br><span class="nota">${esc(e.momento)}</span></td><td class="num">${e.senales}</td><td class="num">${pct(e.exactitud)}</td></tr>`).join("")}</tbody>`;
+  $("#version").textContent = "v" + DATOS.version;
+}
+
+/* ---------- Demo en vivo (Pyodide; solo en la versión de GitHub Pages) ---------- */
+const PY_EVAL = `
+import json
+from alometro.cargar import desde_txt
+from alometro.motor import evaluar
+from alometro.calendario import HORA_COLOMBIA
+def _evaluar(texto):
+    c = desde_txt(texto, "tu-conversacion")
+    e = evaluar(c)
+    anot = {}
+    for cr in e.criterios:
+        if not cr.aplica:
+            continue
+        for ev in cr.evidencias:
+            lst = anot.setdefault(ev.turno, [])
+            if not any(x["id"] == cr.id for x in lst):
+                lst.append({"id": cr.id, "cumple": cr.cumple, "critico": cr.critico})
+    s = e.senales
+    return json.dumps({"titulo": "Tu conversación", "contexto": f"{c.canal} · {c.tipo} · {c.sector}", "fecha": "",
+        "turnos": [{"rol": t.rol, "texto": t.texto} for t in c.turnos], "puntaje": e.puntaje, "base": e.puntaje_base, "nivel": e.nivel,
+        "criticos": [{"id": x["criterio"], "nombre": x["nombre"], "categoria": x["categoria"], "detalle": x["detalle"]} for x in e.errores_criticos],
+        "anotaciones": anot, "dimensiones": e.dimensiones, "recomendaciones": e.recomendaciones,
+        "senales": {k: s[k] for k in ("resolucion", "trayectoria_emocional", "esfuerzo")}}, ensure_ascii=False)
+`;
+let py = null;
+async function cargarMotor() {
+  if (py) return py;
+  $("#vivo-estado").textContent = "Cargando Python en tu navegador (unos segundos la primera vez)…";
+  await new Promise((ok, mal) => {
+    const s = document.createElement("script");
+    s.src = "vendor/pyodide/pyodide.js";
+    s.onload = ok;
+    s.onerror = () => mal(new Error("no se pudo descargar el intérprete de Python (vendor/pyodide). Revisa la conexión y recarga la página."));
+    document.head.appendChild(s);
+  });
+  const p = await loadPyodide({indexURL: new URL("vendor/pyodide/", location.href).href});
+  p.FS.mkdirTree("/home/pyodide/alometro");
+  for (const f of DATOS.archivos_py) {
+    const r = await fetch("py/alometro/" + f);
+    if (!r.ok) throw new Error("No se pudo cargar " + f);
+    p.FS.writeFile("/home/pyodide/alometro/" + f, await r.text());
+  }
+  p.runPython("import sys; sys.path.insert(0, '/home/pyodide')\n" + PY_EVAL);
+  py = p;
+  return p;
+}
+
+function prepararVivo() {
+  const boton = $("#vivo-boton");
+  if (!window.ALOMETRO_VIVO) {
+    $("#vivo-intro").textContent = "En esta vista previa el motor no puede ejecutarse. Instala el paquete (sección Uso) y ejecuta «alometro evaluar» sobre tu archivo, o abre la página publicada en GitHub Pages, donde el motor corre dentro de tu navegador.";
+    boton.disabled = true; boton.style.opacity = .5; boton.style.cursor = "not-allowed";
+    return;
+  }
+  $("#vivo-intro").textContent = "El motor real de Alómetro (Python) corre dentro de tu navegador: el texto no sale de tu equipo. Escribe o pega la conversación; la primera línea puede indicar tipo, canal y sector.";
+  boton.addEventListener("click", async () => {
+    boton.disabled = true;
+    try {
+      const p = await cargarMotor();
+      p.globals.set("TEXTO", $("#vivo-texto").value);
+      const ej = JSON.parse(p.runPython("_evaluar(TEXTO)"));
+      if (!ej.turnos.length) throw new Error("No encontré turnos. Usa una línea por turno con el formato «Cliente: texto».");
+      document.querySelectorAll("#selector button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      mostrarEvaluacion(ej);
+      $("#vivo-estado").textContent = `Listo: ${ej.puntaje}/100 (${ej.nivel}). El resultado está arriba.`;
+      $("#demo-titulo").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+    } catch (e) {
+      $("#vivo-estado").textContent = "No se pudo evaluar: " + (e.message || e);
+    } finally { boton.disabled = false; }
+  });
+}
+
+pintarHero(); pintarProblemas(); pintarSelector(); pintarDemo(0); pintarCriterios(); pintarVerificacion(); prepararVivo();
+</script>

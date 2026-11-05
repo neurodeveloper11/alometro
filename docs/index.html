@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Alómetro evalúa llamadas y chats de servicio al cliente con criterios objetivos: resolución, esfuerzo, salida a una persona, emoción y cumplimiento de la ley colombiana.">
+<title>Alómetro</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: la transcripción anotada es la pieza central; el resto de la página se lee como el informe de un analista de calidad. */
+:root{
+  --paper:#eef2f1; --surface:#fbfcfc; --sunk:#e3e9e7; --ink:#132227; --ink-2:#465a60; --ink-3:#6c7e83; --line:#d3dcda;
+  --signal:#e5a00d; --signal-ink:#7a5200; --signal-wash:#fbefd1;
+  --bad:#c33a2e; --bad-wash:#f8e1dd; --good:#1c7f46; --good-wash:#dcefe3; --link:#0d5f6a;
+  --cliente:#0d5f6a; --empresa:#465a60;
+  --f-display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e1517; --surface:#152024; --sunk:#1b292e; --ink:#e6eeec; --ink-2:#a8b9b7; --ink-3:#7f9290; --line:#26363b;
+  --signal:#f0b232; --signal-ink:#f5c45a; --signal-wash:#3a2f14;
+  --bad:#ef6a5d; --bad-wash:#3d1f1c; --good:#4cc07c; --good-wash:#173326; --link:#6cc5cf;
+  --cliente:#6cc5cf; --empresa:#a8b9b7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e1517; --surface:#152024; --sunk:#1b292e; --ink:#e6eeec; --ink-2:#a8b9b7; --ink-3:#7f9290; --line:#26363b;
+  --signal:#f0b232; --signal-ink:#f5c45a; --signal-wash:#3a2f14;
+  --bad:#ef6a5d; --bad-wash:#3d1f1c; --good:#4cc07c; --good-wash:#173326; --link:#6cc5cf;
+  --cliente:#6cc5cf; --empresa:#a8b9b7; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:400 16px/1.6 var(--f-body);-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px;border-radius:4px}
+.envoltura{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:-0.01em}
+h2{font-size:clamp(1.7rem,3.2vw,2.4rem);font-weight:700;line-height:1.12}
+h3{font-size:1.15rem;font-weight:700;line-height:1.25}
+p{margin:0}
+.etiqueta{font:500 .74rem/1 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.mono{font-family:var(--f-mono)}
+.num{font-variant-numeric:tabular-nums}
+section{padding-block:72px 8px}
+.intro{display:grid;gap:12px;max-width:68ch;margin-bottom:32px}
+.intro p{color:var(--ink-2);font-size:1.05rem}
+
+/* Cabecera */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.cabecera{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.cabecera .envoltura{display:flex;align-items:center;gap:20px;padding-block:12px}
+.marca{font:800 1.25rem/1 var(--f-display);color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.marca svg{width:26px;height:16px}
+.nav{display:flex;gap:18px;margin-left:auto;flex-wrap:wrap}
+.nav a{color:var(--ink-2);text-decoration:none;font-size:.92rem}
+.nav a:hover{color:var(--ink)}
+@media (max-width:760px){.nav a:not(.gh){display:none}}
+
+/* Hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:48px;padding-block:56px 24px;align-items:start}
+@media (max-width:920px){.hero{grid-template-columns:minmax(0,1fr);gap:32px}}
+.hero h1{font-size:clamp(2.6rem,6.4vw,4.6rem);font-weight:800;line-height:.98;letter-spacing:-0.025em}
+.hero h1 em{font-style:normal;color:var(--signal-ink);background:linear-gradient(transparent 62%,var(--signal-wash) 62%)}
+.hero .bajada{font-size:1.18rem;color:var(--ink-2);max-width:52ch;margin-top:20px}
+.acciones{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.boton{display:inline-flex;align-items:center;gap:8px;font:600 .98rem/1 var(--f-body);padding:13px 18px;border-radius:999px;text-decoration:none;border:1px solid var(--ink);cursor:pointer}
+.boton.primario{background:var(--ink);color:var(--paper)}
+.boton.secundario{background:transparent;color:var(--ink)}
+.boton:hover{transform:translateY(-1px)}
+.cifras{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:40px;border-top:1px solid var(--line)}
+.cifras div{padding:14px 12px 0 0}
+.cifras b{display:block;font:800 1.9rem/1 var(--f-display)}
+.cifras span{font-size:.86rem;color:var(--ink-2)}
+@media (max-width:520px){.cifras{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:14px}}
+
+/* Medidor */
+.medidor{display:grid;justify-items:center;gap:2px}
+.medidor svg{width:100%;max-width:260px;height:auto;overflow:visible}
+.medidor .valor{font:800 2.6rem/1 var(--f-display)}
+.medidor .nivel{font:600 .85rem/1 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:999px}
+.nivel.critico{background:var(--bad-wash);color:var(--bad)}
+.nivel.bueno{background:var(--good-wash);color:var(--good)}
+.nivel.medio{background:var(--signal-wash);color:var(--signal-ink)}
+
+/* Transcripción */
+.tarjeta{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.transcripcion{display:grid}
+.turno{display:grid;grid-template-columns:2.4rem 4.6rem minmax(0,1fr);gap:10px;padding:10px 14px;border-top:1px solid var(--line);align-items:start}
+.turno:first-child{border-top:0}
+.turno .n{font:500 .78rem/1.9 var(--f-mono);color:var(--ink-3)}
+.turno .rol{font:500 .78rem/1.9 var(--f-mono);text-transform:uppercase;letter-spacing:.05em;color:var(--empresa)}
+.turno.cliente .rol{color:var(--cliente)}
+.turno .txt{min-width:0;overflow-wrap:anywhere}
+.turno.cliente .txt{font-weight:500}
+.turno.marcado{background:color-mix(in srgb,var(--bad-wash) 55%,transparent)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.chip{font:500 .72rem/1 var(--f-mono);padding:4px 6px;border-radius:5px;border:1px solid var(--line);color:var(--ink-2);background:var(--surface);cursor:help}
+.chip.falla{border-color:var(--bad);color:var(--bad);background:var(--bad-wash)}
+.chip.ok{border-color:color-mix(in srgb,var(--good) 55%,var(--line));color:var(--good)}
+@media (max-width:520px){.turno{grid-template-columns:2rem minmax(0,1fr)}.turno .rol{grid-column:2}.turno .txt{grid-column:2}}
+.hero-panel{display:grid;gap:14px}
+.hero-panel .cabeza{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.hero-panel .resultado{display:grid;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center;padding:16px}
+@media (max-width:520px){.hero-panel .resultado{grid-template-columns:minmax(0,1fr)}}
+.lista-criticos{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.lista-criticos li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;font-size:.92rem;line-height:1.4}
+.lista-criticos b{font-family:var(--f-mono);font-size:.78rem;color:var(--bad);padding-top:2px}
+
+/* Problema */
+.datos-grandes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:2px solid var(--ink)}
+.datos-grandes>div{padding:20px 20px 4px 0;display:grid;gap:8px;align-content:start}
+.datos-grandes .cifra{font:800 clamp(2.4rem,5vw,3.4rem)/1 var(--f-display);letter-spacing:-0.02em}
+.datos-grandes p{color:var(--ink-2);font-size:.95rem}
+.fuente{font-size:.8rem;color:var(--ink-3)}
+@media (max-width:860px){.datos-grandes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.datos-grandes{grid-template-columns:minmax(0,1fr)}}
+.problemas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 40px;margin-top:40px}
+@media (max-width:760px){.problemas{grid-template-columns:minmax(0,1fr)}}
+.problema{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:14px 0;border-top:1px solid var(--line);align-items:baseline}
+.problema .ids{font:500 .78rem/1 var(--f-mono);color:var(--ink-3);white-space:nowrap}
+
+/* Operaciones */
+.tres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:900px){.tres{grid-template-columns:minmax(0,1fr)}}
+.tres .tarjeta{padding:22px;display:grid;gap:12px;align-content:start}
+.tres ul{margin:0;padding-left:1.1em;color:var(--ink-2);display:grid;gap:6px}
+
+/* Pasos */
+.pasos{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:paso}
+@media (max-width:900px){.pasos{grid-template-columns:minmax(0,1fr)}}
+.paso{padding:18px 18px 18px 0;border-top:2px solid var(--ink);display:grid;gap:8px;align-content:start}
+.paso::before{counter-increment:paso;content:counter(paso,decimal-leading-zero);font:500 .8rem/1 var(--f-mono);color:var(--signal-ink)}
+.paso p{color:var(--ink-2);font-size:.95rem}
+
+/* Demo */
+.selector{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.selector button{font:500 .9rem/1.2 var(--f-body);padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.selector button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.demo{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:920px){.demo{grid-template-columns:minmax(0,1fr)}}
+.demo .lateral{display:grid;gap:16px}
+.demo .bloque{padding:18px;display:grid;gap:12px}
+.dims{display:grid;gap:10px}
+.dim{display:grid;grid-template-columns:9.5rem minmax(0,1fr) 2.6rem;gap:10px;align-items:center;font-size:.9rem}
+.barra{height:8px;border-radius:4px;background:var(--sunk);position:relative;overflow:hidden}
+.barra i{position:absolute;inset:0 auto 0 0;border-radius:4px;background:var(--ink-2)}
+.recs{margin:0;padding-left:1.1em;display:grid;gap:8px;color:var(--ink-2);font-size:.93rem}
+.meta-conv{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.86rem;color:var(--ink-3)}
+.vivo{margin-top:24px;padding:20px;display:grid;gap:12px}
+.vivo textarea{width:100%;min-height:180px;font:400 .9rem/1.5 var(--f-mono);padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);resize:vertical}
+.vivo .fila{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.estado{font-size:.9rem;color:var(--ink-2)}
+
+/* Criterios */
+.dimensiones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.dimensiones{grid-template-columns:minmax(0,1fr)}}
+.dimensiones .tarjeta{padding:6px 18px 10px}
+.dimensiones h3{padding:14px 0 6px}
+details.crit{border-top:1px solid var(--line)}
+details.crit summary{display:grid;grid-template-columns:2.8rem minmax(0,1fr) auto;gap:10px;padding:10px 0;cursor:pointer;list-style:none;align-items:baseline}
+details.crit summary::-webkit-details-marker{display:none}
+details.crit summary .id{font:500 .8rem/1 var(--f-mono);color:var(--ink-3)}
+details.crit .peso{font:500 .76rem/1 var(--f-mono);color:var(--ink-2);white-space:nowrap}
+details.crit .peso.critico{color:var(--bad)}
+details.crit .cuerpo{padding:0 0 12px 3.4rem;display:grid;gap:6px;font-size:.92rem;color:var(--ink-2)}
+@media (max-width:520px){details.crit .cuerpo{padding-left:0}}
+
+/* Verificación */
+.tabla-env{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .74rem/1.3 var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+#tabla-comparacion{min-width:720px}
+@media (max-width:600px){#tabla-comparacion{min-width:560px}#tabla-comparacion td .nota{display:none}}
+.veredicto{display:inline-flex;align-items:center;gap:6px;font-size:.84rem;white-space:nowrap}
+.veredicto i{width:8px;height:8px;border-radius:50%;background:var(--ink-3)}
+.veredicto.mejora i{background:var(--good)}.veredicto.empeora i{background:var(--bad)}
+.dos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:16px}
+@media (max-width:860px){.dos{grid-template-columns:minmax(0,1fr)}}
+.dos .tarjeta{padding:20px;display:grid;gap:12px;align-content:start}
+.contencion{display:grid;gap:12px}
+.contencion .fila{display:grid;grid-template-columns:5.5rem minmax(0,1fr) 3.4rem;gap:10px;align-items:center;font-size:.9rem}
+.contencion .barra i.aparente{background:var(--ink-3)}
+.contencion .barra i.real{background:var(--good)}
+.nota{font-size:.86rem;color:var(--ink-3)}
+ol.pasos-ver{margin:0;padding-left:1.2em;display:grid;gap:8px;color:var(--ink-2)}
+
+/* Instalar */
+pre{margin:0;overflow-x:auto;background:var(--ink);color:var(--paper);padding:16px;border-radius:var(--r);font:400 .86rem/1.6 var(--f-mono)}
+.instalar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:860px){.instalar{grid-template-columns:minmax(0,1fr)}}
+.garantias{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.garantias li{padding-left:22px;position:relative;color:var(--ink-2)}
+.garantias li::before{content:"";position:absolute;left:0;top:.6em;width:10px;height:2px;background:var(--signal)}
+footer{margin-top:80px;border-top:1px solid var(--line);padding-block:28px 48px;color:var(--ink-3);font-size:.88rem}
+footer .envoltura{display:grid;gap:8px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.boton:hover{transform:none}}
+.aguja{transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+</style>
+</head>
+<body>
+<script>window.ALOMETRO_VIVO = true;</script>
+
+<header class="cabecera">
+  <div class="envoltura">
+    <a class="marca" href="#inicio" aria-label="Alómetro, inicio">
+      <svg viewBox="0 0 26 16" aria-hidden="true"><path d="M2 15a11 11 0 0 1 22 0" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M13 15 19 6" stroke="var(--signal)" stroke-width="2.4" stroke-linecap="round"/></svg>
+      Alómetro
+    </a>
+    <nav class="nav" aria-label="Secciones">
+      <a href="#problema">Problema</a><a href="#como">Cómo funciona</a><a href="#probar">Probar</a><a href="#criterios">Criterios</a><a href="#verificar">Verificación</a>
+      <a class="gh" href="https://github.com/neurodeveloper11/alometro">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+  <div class="envoltura">
+    <div class="hero">
+      <div>
+        <p class="etiqueta">Calidad de atención · Colombia y Latinoamérica</p>
+        <h1 style="margin-top:14px">Mide si tu servicio al cliente <em>de verdad ayuda</em>.</h1>
+        <p class="bajada">Alómetro lee cada llamada, chat y conversación con bot, y responde con evidencia: ¿se resolvió?, ¿cuánto le costó al cliente?, ¿pudo hablar con una persona?, ¿salió más tranquilo o más bravo?, ¿se cumplió la ley?</p>
+        <div class="acciones">
+          <a class="boton primario" href="#probar">Ver una evaluación</a>
+          <a class="boton secundario" href="#criterios">Leer los criterios</a>
+        </div>
+        <div class="cifras" id="cifras"></div>
+      </div>
+      <div class="tarjeta hero-panel" id="hero-panel" aria-label="Ejemplo de evaluación"></div>
+    </div>
+  </div>
+
+  <section id="problema">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">El problema</p>
+        <h2>«Quiero hablar con una persona.»</h2>
+        <p>Es lo que más temen los clientes cuando una empresa pone un bot a atender: en la encuesta de Gartner, el 60 % teme que la IA le impida llegar a una persona. Las métricas de siempre (tiempo de atención, contención del bot) no la ven: un bot que nunca deja salir al cliente parece eficiente en el tablero y es un fracaso para la persona.</p>
+      </div>
+      <div class="datos-grandes">
+        <div><b class="num cifra">64 %</b><p>de los clientes preferiría que las empresas no usaran IA en el servicio al cliente. Su principal temor: no poder llegar a una persona.</p><a class="fuente" href="https://www.gartner.com/en/newsroom/press-releases/2024-07-09-gartner-survey-finds-64-percent-of-customers-would-prefer-that-companies-didnt-use-ai-for-customer-service">Gartner, 2024 · 5.728 clientes</a></div>
+        <div><b class="num cifra">39 %</b><p>de los colombianos que abandonan los chatbots bancarios lo hace porque prefiere la atención humana; es el motivo más citado.</p><a class="fuente" href="https://www.descubre.vc/noticia/delto-estudio-revela-por-qu-los-colombianos-abandonan-los-chatbots-bancarios-2025-08-11">Estudio Delto, 2025</a></div>
+        <div><b class="num cifra">63 %</b><p>valora por encima de todo que el bot lo pase a una persona <b>sin perder el contexto</b>, sin volver a dictar la cédula.</p><a class="fuente" href="https://www.descubre.vc/noticia/delto-estudio-revela-por-qu-los-colombianos-abandonan-los-chatbots-bancarios-2025-08-11">Estudio Delto, 2025</a></div>
+        <div><b class="num cifra">2,01 M</b><p>quejas por servicios de telecomunicaciones en Colombia en solo el segundo semestre de 2024.</p><a class="fuente" href="https://dplnews.com/colombia-quejas-por-servicios-de-telecomunicaciones-cayeron-un-267-en-el-segundo-semestre-de-2024-crc/">CRC vía DPL News</a></div>
+      </div>
+      <div class="problemas" id="problemas"></div>
+    </div>
+  </section>
+
+  <section id="operaciones">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Para las tres caras del call center</p>
+        <h2>Ventas, clientes actuales y soporte se miden distinto.</h2>
+        <p>Cada criterio declara cuándo aplica. Una venta no se evalúa como una cancelación, y una conversación solo con bot no se evalúa como una llamada con una asesora.</p>
+      </div>
+      <div class="tres">
+        <div class="tarjeta"><p class="etiqueta">Ventas y telemercadeo</p><h3>Vender sin acosar</h3><ul><li>Horario legal de la Ley 2300 y alertas de frecuencia por cliente</li><li>Precio, permanencia y derecho de retracto informados</li><li>Aceptación expresa: «como sea» no es un sí</li><li>Respeto del «no» del cliente</li><li>Autorización de datos (Ley 1581)</li></ul></div>
+        <div class="tarjeta"><p class="etiqueta">Clientes actuales</p><h3>Servicio, retención, cancelación y cobranza</h3><ul><li>Cancelar sin trabas: radicar primero, ofertas después</li><li>Cobranza sin amenazas, sin terceros, sin visitas</li><li>Verificación de identidad antes de dar saldos</li><li>Nunca pedir claves, PIN ni códigos OTP</li><li>Resolución o radicado con plazo</li></ul></div>
+        <div class="tarjeta"><p class="etiqueta">Soporte, PQR y bots</p><h3>Que el cliente salga resuelto</h3><ul><li>Salida a una persona cuando la pide</li><li>Bucles del bot y contención falsa</li><li>Traspaso con contexto, sin repetir datos</li><li>Transferencias, esperas y desvíos a otros canales</li><li>Emoción del cliente al inicio y al final</li></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Cómo funciona</p>
+        <h2>Reglas explícitas, evidencia citada, nada sale del equipo.</h2>
+        <p>Sin modelos opacos ni APIs externas: cada conclusión apunta al turno y a la frase que la respalda, para que un analista de calidad pueda auditarla en segundos.</p>
+      </div>
+      <div class="pasos">
+        <div class="paso"><h3>Transcripciones</h3><p>Llamadas transcritas, chats o WhatsApp en JSONL, CSV o texto. Roles: cliente, agente, bot y sistema.</p></div>
+        <div class="paso"><h3>Anonimización</h3><p>Cédulas, teléfonos, correos, tarjetas y direcciones se ocultan en las evidencias. Los radicados se conservan.</p></div>
+        <div class="paso"><h3>Señales con evidencia</h3><p>Petición de humano, bucles, datos repetidos, frustración por turno, resolución, radicados, ofertas, amenazas.</p></div>
+        <div class="paso"><h3>Rúbrica</h3><p id="paso-rubrica">Criterios en seis dimensiones y errores críticos que anulan la nota.</p></div>
+        <div class="paso"><h3>Indicadores</h3><p>Metas con intervalo de confianza, recontacto a 7 días y comparación antes/después con significancia.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="probar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Evaluaciones reales del motor</p>
+        <h2>Elige una conversación y mira qué encuentra.</h2>
+        <p>Son conversaciones sintéticas que reproducen problemas frecuentes en Colombia. Los resultados los calculó el motor de Alómetro, no están escritos a mano. Pasa el cursor sobre una etiqueta para ver el criterio.</p>
+      </div>
+      <div class="selector" id="selector" role="group" aria-label="Conversaciones de ejemplo"></div>
+      <div class="demo">
+        <div class="tarjeta">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:4px">
+            <h3 id="demo-titulo"></h3>
+            <div class="meta-conv" id="demo-meta"></div>
+          </div>
+          <div class="transcripcion" id="demo-transcripcion"></div>
+        </div>
+        <div class="lateral">
+          <div class="tarjeta bloque"><div class="medidor" id="demo-medidor"></div><ul class="lista-criticos" id="demo-criticos"></ul></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Por dimensión</p><div class="dims" id="demo-dims"></div></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Qué mejorar primero</p><ol class="recs" id="demo-recs"></ol></div>
+        </div>
+      </div>
+      <div class="tarjeta vivo" id="vivo">
+        <h3>Evalúa tu propia conversación</h3>
+        <p class="estado" id="vivo-intro"></p>
+        <label for="vivo-texto" class="etiqueta">Transcripción (una línea por turno: «Rol: texto»)</label>
+        <textarea id="vivo-texto" spellcheck="false"># tipo: servicio | canal: chat | sector: financiero
+Bot: Hola, soy el asistente virtual. ¿En qué te ayudo?
+Cliente: Necesito hablar con un asesor, me hicieron un cobro que no reconozco
+Bot: Para ayudarte escribe tu número de cédula
+Cliente: 1020304050
+Bot: Te comunico con un asesor
+Agente: Buenas tardes, me regala su número de cédula por favor
+Cliente: otra vez?? ya se la di al bot</textarea>
+        <div class="fila"><button class="boton primario" id="vivo-boton" type="button">Evaluar con el motor</button><span class="estado" id="vivo-estado" role="status"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="criterios">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">La rúbrica completa</p>
+        <h2 id="criterios-titulo">Criterios objetivos de revisión</h2>
+        <p>La nota es 100 × puntos cumplidos / puntos que aplican: lo que no aplica no suma ni resta. Los errores críticos se miden aparte, en tres categorías (cliente, negocio y cumplimiento), y anulan la nota de la interacción, como en los modelos de calidad COPC.</p>
+      </div>
+      <div class="dimensiones" id="dimensiones"></div>
+    </div>
+  </section>
+
+  <section id="verificar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Criterios de éxito</p>
+        <h2>¿Cómo saber si la operación está mejorando de verdad?</h2>
+        <p>Alómetro no se queda en la nota. Calcula indicadores de resultado con meta e intervalo de confianza del 95 %, y compara periodos para separar la mejora real del ruido. Las metas son puntos de partida: fíjelas con cuatro semanas de línea base.</p>
+      </div>
+      <div class="tabla-env"><table id="tabla-comparacion"></table></div>
+      <p class="nota" id="nota-comparacion" style="margin-top:10px"></p>
+      <div class="dos">
+        <div class="tarjeta"><p class="etiqueta">Contención del bot</p><h3>Aparente contra real</h3><p style="color:var(--ink-2)">Un bot que nunca transfiere tiene «contención» alta. Alómetro solo cuenta como contenida la conversación que el bot resolvió y que no volvió por otro canal en 7 días.</p><div class="contencion" id="contencion"></div></div>
+        <div class="tarjeta"><p class="etiqueta">¿Mide bien la herramienta?</p><h3>Precisión publicada con honestidad</h3><p style="color:var(--ink-2)">Los detectores se prueban con conversaciones escritas a mano, con redacciones distintas a las de la demo. La cifra que vale es la del conjunto ciego, medido antes de ajustar las reglas.</p><div class="tabla-env"><table id="tabla-precision"></table></div>
+          <ol class="pasos-ver"><li>Calibración: dos analistas califican 50 o más interacciones y <span class="mono">alometro calibrar</span> mide el acuerdo (kappa). Solo los criterios con κ ≥ 0,60 se usan para decisiones.</li><li>Validez: el puntaje debe correlacionar con la encuesta CSAT, y lo «resuelto» debe tener menos recontacto que lo «no resuelto».</li></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="instalar">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Uso</p>
+        <h2>Un comando, un informe.</h2>
+      </div>
+      <div class="instalar">
+        <pre><code>pip install "git+https://github.com/neurodeveloper11/alometro.git"
+
+alometro demo
+alometro evaluar llamadas.jsonl -o informe.html --csv notas.csv
+alometro comparar septiembre.jsonl octubre.jsonl
+alometro calibrar llamadas.jsonl etiquetas_analistas.csv</code></pre>
+        <ul class="garantias">
+          <li><b>100 % local.</b> No envía transcripciones a internet ni usa APIs de terceros. Corre en un portátil, en un servidor de la empresa o en el navegador.</li>
+          <li><b>Sin dependencias.</b> Python 3.10 o superior y nada más.</li>
+          <li><b>Auditable.</b> Cada hallazgo cita turno y frase; las evidencias se anonimizan.</li>
+          <li><b>Hecho para Colombia.</b> Festivos de la Ley Emiliani, Ley 2300, Estatuto del Consumidor, Habeas Data y reglas de la CRC.</li>
+          <li><b>Aviso.</b> Es una ayuda para los equipos de calidad: no reemplaza la revisión humana ni la asesoría jurídica.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="envoltura">
+    <p>Alómetro <span id="version"></span> · Licencia MIT · Creado por <a href="https://www.linkedin.com/in/fabio-torres-39364b258">Fabio Torres</a>, ingeniero de datos y psicólogo organizacional.</p>
+    <p>Las cifras de la sección «El problema» son de las fuentes enlazadas. Los ejemplos y la comparación antes/después usan datos sintéticos; empresas y personas son ficticias.</p>
+  </div>
+</footer>
+
+<script>
+const DATOS = {"version":"0.1.0","generado":"04/11/2026","dimensiones":{"resolucion":"Resolución","esfuerzo":"Esfuerzo del cliente","trato":"Trato humano","bot":"Asistente virtual","proceso":"Proceso y guion","cumplimiento":"Cumplimiento (Colombia)"},"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","peso":20,"critico":null,"recomendacion":"Cierre cada contacto con una solución confirmada o con un radicado y un plazo concretos.","fundamento":"Resolución en el primer contacto (FCR): evita el recontacto, que es costo para la empresa y esfuerzo para el cliente."},{"id":"R2","nombre":"Radicado y plazo ante queja","dimension":"resolucion","peso":10,"critico":null,"recomendacion":"Ante toda queja o reclamo entregue el número de radicado (CUN en telecomunicaciones) y el plazo legal de respuesta.","fundamento":"En telecomunicaciones la PQR se identifica con CUN y el operador tiene 15 días hábiles; en general la queja debe quedar trazable."},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","peso":0,"critico":"cliente","recomendacion":"Si no puede resolver, nunca termine sin un siguiente paso: radique, escale o agende.","fundamento":"Un cliente sin solución ni camino convierte su caso en PQR, en queja ante la SIC o la CRC, o en abandono."},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","peso":8,"critico":null,"recomendacion":"Resuelva o transfiera una sola vez, con el caso documentado.","fundamento":"Cada transferencia obliga a repetir el caso y aumenta el esfuerzo del cliente (CES)."},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","peso":10,"critico":null,"recomendacion":"Lea el historial y lo que el cliente ya dio antes de pedirle datos.","fundamento":"Escalar a una persona sin perder el contexto es la función más valorada de un chatbot bancario en Colombia (63 %, Delto 2025)."},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","peso":6,"critico":null,"recomendacion":"Si otro canal es necesario, deje radicado el caso antes de enviarlo allí.","fundamento":"Desviar al cliente («escriba al correo», «vaya a una oficina») traslada el esfuerzo al cliente."},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","peso":4,"critico":null,"recomendacion":"Agrupe las consultas internas para no poner al cliente en espera varias veces.","fundamento":"Varias esperas seguidas indican que quien atiende no tiene la información a mano y alargan el contacto."},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","peso":5,"critico":null,"recomendacion":"Si el cliente repite algo, es señal de que no se le entendió: confirme y cambie de enfoque.","fundamento":"La repetición es un indicador directo de comprensión fallida."},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","peso":5,"critico":null,"recomendacion":"Revise el recorrido completo: cada obstáculo suma (transferencia, espera, desvío, bucle, dato repetido).","fundamento":"Índice de esfuerzo 0-10 de Alómetro, inspirado en el Customer Effort Score (CES)."},{"id":"T1","nombre":"Reconoce la emoción del cliente","dimension":"trato","peso":10,"critico":null,"recomendacion":"Nombre la emoción antes de la solución: «Entiendo su molestia, llevar tres días sin servicio es mucho».","fundamento":"Validación emocional: reduce la activación y abre la escucha (base de la desescalada)."},{"id":"T2","nombre":"Escucha activa","dimension":"trato","peso":6,"critico":null,"recomendacion":"Parafrasee la solicitud: «Si le entiendo bien, el cobro de octubre no corresponde…».","fundamento":"Parafrasear confirma comprensión y evita resolver el problema equivocado."},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","peso":5,"critico":null,"recomendacion":"Use lenguaje de responsabilidad: «Yo me encargo», «Voy a revisar…».","fundamento":"El lenguaje de apropiación aumenta la confianza en la solución."},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","peso":8,"critico":null,"recomendacion":"Cambie «no se puede» por «lo que sí puedo hacer es…» y nunca culpe al cliente.","fundamento":"Las negativas secas y la culpa al cliente disparan la frustración."},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","peso":0,"critico":"cliente","recomendacion":"Tolerancia cero al irrespeto. Si el cliente agrede, aplique el protocolo de llamada difícil.","fundamento":"El irrespeto al cliente es un error crítico en cualquier modelo de calidad."},{"id":"T6","nombre":"Baja la frustración","dimension":"trato","peso":8,"critico":null,"recomendacion":"Valide, explique qué va a hacer y en cuánto tiempo, y confirme al final.","fundamento":"El estado emocional con el que termina la conversación es lo que el cliente recuerda de la marca."},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","peso":3,"critico":null,"recomendacion":"Evite repetir «lamentamos los inconvenientes»: personalice la disculpa una sola vez.","fundamento":"La disculpa repetida de guion se percibe como indiferencia."},{"id":"B1","nombre":"El asistente dice que es virtual","dimension":"bot","peso":5,"critico":null,"recomendacion":"Configure el primer mensaje: «Soy el asistente virtual de…; si lo prefiere, le paso con una persona».","fundamento":"Transparencia: los proyectos de ley de IA en Colombia piden avisar cuando se habla con una IA."},{"id":"B2","nombre":"Pasa a una persona cuando se pide","dimension":"bot","peso":12,"critico":null,"recomendacion":"Transfiera a una persona como máximo en la segunda respuesta después de que la pidan.","fundamento":"El 60 % de los clientes teme que la IA le impida llegar a una persona (Gartner, encuesta a 5.728 clientes, 2024)."},{"id":"B2C","nombre":"No niega la atención humana","dimension":"bot","peso":0,"critico":"cliente","recomendacion":"Nunca bloquee la salida a humano: la petición repetida debe forzar el traspaso.","fundamento":"La preferencia por la atención humana es el motivo más citado para abandonar los chatbots bancarios en Colombia (39 %, Delto 2025)."},{"id":"B3","nombre":"Sin bucles del bot","dimension":"bot","peso":10,"critico":null,"recomendacion":"Tras dos «no entendí» seguidos, ofrezca una persona automáticamente.","fundamento":"El «bucle sin salida» (doom loop) infla la contención y destruye la satisfacción."},{"id":"B4","nombre":"Traspaso con contexto","dimension":"bot","peso":8,"critico":null,"recomendacion":"Pase a la persona la intención, los datos verificados y lo ya intentado.","fundamento":"Escalar a un humano sin perder el contexto es la función más valorada de un chatbot bancario (63 %, Delto 2025)."},{"id":"B5","nombre":"Contención real, no falsa","dimension":"bot","peso":0,"critico":"cliente","recomendacion":"Mida la contención solo cuando el cliente resolvió; si no, debe salir a una persona.","fundamento":"Un bot que «retiene» clientes sin resolverles es una contención falsa: el problema vuelve por otro canal."},{"id":"P1","nombre":"Saludo","dimension":"proceso","peso":2,"critico":null,"recomendacion":"Salude al iniciar.","fundamento":"Protocolo básico de apertura."},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","peso":3,"critico":null,"recomendacion":"Diga su nombre y la empresa (o que es un asistente virtual).","fundamento":"El cliente debe saber con quién habla."},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","peso":4,"critico":null,"recomendacion":"Pregunte de forma abierta y deje que el cliente explique.","fundamento":"Sin diagnóstico no hay solución correcta."},{"id":"P4","nombre":"Verifica identidad antes de dar datos","dimension":"proceso","peso":8,"critico":null,"recomendacion":"Valide la identidad antes de dar saldos, deudas o datos de la cuenta.","fundamento":"Protección de datos personales y prevención de fraude."},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","peso":4,"critico":null,"recomendacion":"Antes de cerrar, resuma: qué se hizo, qué sigue y cuándo.","fundamento":"El resumen reduce el recontacto por malentendidos."},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","peso":2,"critico":null,"recomendacion":"Pregunte si hay algo más.","fundamento":"Cierre completo."},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","peso":2,"critico":null,"recomendacion":"Despídase con cordialidad.","fundamento":"Protocolo de cierre."},{"id":"P8","nombre":"Aviso de grabación","dimension":"proceso","peso":3,"critico":null,"recomendacion":"Informe al inicio que la llamada se graba y para qué.","fundamento":"Transparencia en el tratamiento de datos (Ley 1581 de 2012)."},{"id":"L1","nombre":"Horario legal de contacto","dimension":"cumplimiento","peso":0,"critico":"cumplimiento","recomendacion":"Programe las campañas salientes solo de lunes a viernes de 7:00 a 19:00 y sábados de 8:00 a 15:00, sin domingos ni festivos.","fundamento":"Ley 2300 de 2023 («Dejen de fregar»), art. 3."},{"id":"L2","nombre":"Informa el derecho de retracto","dimension":"cumplimiento","peso":0,"critico":"cumplimiento","recomendacion":"En toda venta telefónica o digital informe los 5 días hábiles para retractarse.","fundamento":"Ley 1480 de 2011 (Estatuto del Consumidor), art. 47; Decreto 1074 de 2015."},{"id":"L3","nombre":"Aceptación expresa de la venta","dimension":"cumplimiento","peso":0,"critico":"negocio","recomendacion":"Pregunte «¿Acepta…?» y espere un «sí, acepto» claro antes de activar.","fundamento":"Sin aceptación expresa la venta es reversible y genera reclamos por cobros no autorizados."},{"id":"L4","nombre":"Precio y condiciones claros","dimension":"cumplimiento","peso":8,"critico":null,"recomendacion":"Diga el precio total, la permanencia y cuándo cambia el precio promocional.","fundamento":"Información clara, veraz y suficiente (Ley 1480 de 2011)."},{"id":"L5","nombre":"Autorización de datos personales","dimension":"cumplimiento","peso":6,"critico":null,"recomendacion":"Pida autorización de tratamiento de datos antes de registrar datos personales.","fundamento":"Ley 1581 de 2012 (Habeas Data)."},{"id":"L6","nombre":"Respeta el «no» del cliente","dimension":"cumplimiento","peso":8,"critico":null,"recomendacion":"Tras dos negativas, agradezca y cierre.","fundamento":"La insistencia tras una negativa es la práctica que la Ley 2300 de 2023 («Dejen de fregar») busca frenar."},{"id":"L7","nombre":"Cancelación sin trabas","dimension":"cumplimiento","peso":0,"critico":"cumplimiento","recomendacion":"Radique primero la cancelación y entregue el número; cualquier oferta, después y por otro canal.","fundamento":"Res. CRC 8171 de 2026 (servicios móviles): canal de cancelación sin ofertas de retención y con envío del CUN."},{"id":"L8","nombre":"Cobranza sin coerción","dimension":"cumplimiento","peso":0,"critico":"cumplimiento","recomendacion":"Nunca amenace ni mencione a terceros, visitas o consecuencias penales.","fundamento":"Ley 2300 de 2023: prohíbe visitas al domicilio o trabajo y contactar a terceros; prácticas abusivas de cobranza."},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","peso":0,"critico":"negocio","recomendacion":"Nunca pida clave, PIN, CVV ni códigos OTP: diga «nunca se los pediremos».","fundamento":"Es la puerta de entrada del fraude por suplantación (vishing)."}],"indicadores":[{"id":"I01","nombre":"Resolución en el contacto","formula":"resueltas o radicadas con plazo / interacciones de atención","sentido":"mayor","meta":0.7,"unidad":"%","por_que":"Es el objetivo principal: que el cliente salga con su problema resuelto o con un compromiso concreto."},{"id":"I02","nombre":"Recontacto en 7 días","formula":"clientes que vuelven a contactar en 7 días / interacciones observables","sentido":"menor","meta":0.15,"unidad":"%","por_que":"La prueba real de la resolución: si el cliente vuelve, no se resolvió (aunque la conversación lo pareciera)."},{"id":"I03","nombre":"Peticiones de humano atendidas","formula":"transferidas a una persona / conversaciones de bot donde se pidió","sentido":"mayor","meta":0.95,"unidad":"%","por_que":"Responde a la queja central de la gente: «quiero hablar con una persona»."},{"id":"I04","nombre":"Respuestas del bot hasta la persona","formula":"mediana de respuestas del bot entre la petición y la persona","sentido":"menor","meta":2,"unidad":"pasos","por_que":"Cada respuesta extra del bot después de pedir una persona aumenta la frustración."},{"id":"I05","nombre":"Bucles del bot","formula":"conversaciones con bucle / conversaciones con bot","sentido":"menor","meta":0.05,"unidad":"%","por_que":"El bucle sin salida es la experiencia que hace sentir que «el servicio al cliente no sirve»."},{"id":"I06","nombre":"Contención falsa","formula":"conversaciones solo-bot sin solución o con recontacto / conversaciones solo-bot","sentido":"menor","meta":0.1,"unidad":"%","por_que":"Separa la contención real (el bot resolvió) de la aparente (el cliente se rindió o volvió por otro canal)."},{"id":"I07","nombre":"Pérdida de contexto","formula":"conversaciones donde se repidieron datos / conversaciones con traspaso","sentido":"menor","meta":0.1,"unidad":"%","por_que":"Escalar sin perder el contexto es lo que más valoran los usuarios de chatbots bancarios en Colombia (63 %, Delto 2025)."},{"id":"I08","nombre":"Desescalada de clientes frustrados","formula":"clientes que terminan menos frustrados / clientes que empezaron frustrados","sentido":"mayor","meta":0.6,"unidad":"%","por_que":"Mide si la atención calma o enciende. Es la competencia humana que un bot no reemplaza."},{"id":"I09","nombre":"Frustración que escala","formula":"conversaciones donde la frustración sube / conversaciones con 2+ turnos del cliente","sentido":"menor","meta":0.1,"unidad":"%","por_que":"La conversación no debería empeorar el ánimo del cliente."},{"id":"I10","nombre":"Libre de error crítico: cliente","formula":"interacciones sin error crítico de cliente / total","sentido":"mayor","meta":0.95,"unidad":"%","por_que":"Callejón sin salida, humano negado, irrespeto o contención falsa."},{"id":"I11","nombre":"Libre de error crítico: negocio","formula":"interacciones sin error crítico de negocio / total","sentido":"mayor","meta":0.97,"unidad":"%","por_que":"Ventas sin aceptación expresa, petición de claves u OTP."},{"id":"I12","nombre":"Libre de error crítico: cumplimiento","formula":"interacciones sin error crítico normativo / total","sentido":"mayor","meta":0.99,"unidad":"%","por_que":"Ley 2300, Ley 1480, Res. CRC 8171: cada falla es una posible sanción."},{"id":"I13","nombre":"Esfuerzo alto del cliente","formula":"interacciones con esfuerzo ≥ 5 de 10 / total","sentido":"menor","meta":0.15,"unidad":"%","por_que":"Transferencias, esperas, desvíos y repeticiones. El esfuerzo del cliente se asocia con la deslealtad (Dixon, Freeman y Toman, HBR 2010)."},{"id":"I14","nombre":"Amenaza de queja externa","formula":"interacciones con mención de SIC, tutela, abogado o redes / total","sentido":"menor","meta":0.03,"unidad":"%","por_que":"Anticipa quejas ante la SIC, la Superfinanciera o la CRC y crisis en redes."},{"id":"I15","nombre":"Abandono sin solución","formula":"interacciones donde el cliente se va frustrado o pidiendo humano / total","sentido":"menor","meta":0.05,"unidad":"%","por_que":"El cliente que se va sin solución no siempre se queja: simplemente se va."},{"id":"I16","nombre":"Puntaje de calidad promedio","formula":"promedio del puntaje final (0-100)","sentido":"mayor","meta":80,"unidad":"pts","por_que":"Resume el cumplimiento de la rúbrica, con los errores críticos anulando la nota."}],"ejemplos":[{"clave":"bot_bucle_sin_humano","titulo":"El bot que no deja salir","contexto":"WhatsApp · servicio · telecomunicaciones","fecha":"miércoles 14/10 19:12","turnos":[{"rol":"bot","texto":"¡Hola! Bienvenido a Banco Cordillera. Escribe el número de la opción: 1. Facturas 2. Planes 3. Soporte"},{"rol":"cliente","texto":"Me cobraron doble la factura de este mes y necesito que me devuelvan la plata"},{"rol":"bot","texto":"Lo siento, no te entendí. Escribe el número de la opción: 1. Facturas 2. Planes 3. Soporte"},{"rol":"cliente","texto":"1"},{"rol":"bot","texto":"Puedes descargar tu factura en nuestra app o página web. ¿Te puedo ayudar en algo más?"},{"rol":"cliente","texto":"No quiero la factura, quiero hablar con un asesor"},{"rol":"bot","texto":"Lo siento, no te entendí. Escribe el número de la opción: 1. Facturas 2. Planes 3. Soporte"},{"rol":"cliente","texto":"ASESOR!!! QUIERO HABLAR CON UNA PERSONA"},{"rol":"bot","texto":"Puedes descargar tu factura en nuestra app o página web. ¿Te puedo ayudar en algo más?"},{"rol":"cliente","texto":"Esto no sirve para nada, voy a poner la queja en la Superintendencia"}],"puntaje":0,"base":35,"nivel":"Crítico","criticos":[{"id":"R3","nombre":"Sin callejón sin salida","categoria":"cliente","detalle":"El cliente terminó sin solución y sin siguiente paso (callejón sin salida)."},{"id":"B2C","nombre":"No niega la atención humana","categoria":"cliente","detalle":"Atención humana negada: pidió una persona varias veces y el bot no lo transfirió."},{"id":"B5","nombre":"Contención real, no falsa","categoria":"cliente","detalle":"El cliente se fue del bot sin solución: es una «contención» falsa."}],"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","cumple":false,"critico":null,"detalle":"La solicitud no se resolvió.","turnos":[10]},{"id":"R2","nombre":"Radicado y plazo ante queja","dimension":"resolucion","cumple":false,"critico":null,"detalle":"Hubo queja o solicitud formal y no se entregó número de radicado.","turnos":[2]},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","cumple":false,"critico":"cliente","detalle":"El cliente terminó sin solución y sin siguiente paso (callejón sin salida).","turnos":[10]},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se pidieron de nuevo datos que el cliente ya había dado.","turnos":[]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"El cliente no tuvo que repetir su mensaje.","turnos":[]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":false,"critico":null,"detalle":"Índice de esfuerzo 5/10: la suma de transferencias, esperas, desvíos, bucles y repeticiones fue alta.","turnos":[]},{"id":"T1","nombre":"Reconoce la emoción del cliente","dimension":"trato","cumple":false,"critico":null,"detalle":"El cliente mostró frustración y nadie la reconoció.","turnos":[10]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":false,"critico":null,"detalle":"No parafraseó ni confirmó lo que entendió de la solicitud.","turnos":[]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"B1","nombre":"El asistente dice que es virtual","dimension":"bot","cumple":false,"critico":null,"detalle":"El asistente no dijo que es un asistente virtual en sus primeros mensajes.","turnos":[]},{"id":"B2","nombre":"Pasa a una persona cuando se pide","dimension":"bot","cumple":false,"critico":null,"detalle":"Pidió una persona 2 veces y nunca se la dieron.","turnos":[6,8]},{"id":"B2C","nombre":"No niega la atención humana","dimension":"bot","cumple":false,"critico":"cliente","detalle":"Atención humana negada: pidió una persona varias veces y el bot no lo transfirió.","turnos":[6,8]},{"id":"B3","nombre":"Sin bucles del bot","dimension":"bot","cumple":false,"critico":null,"detalle":"El bot entró en bucle (repitió respuestas o «no entendí» varias veces).","turnos":[3,7,9]},{"id":"B5","nombre":"Contención real, no falsa","dimension":"bot","cumple":false,"critico":"cliente","detalle":"El cliente se fue del bot sin solución: es una «contención» falsa.","turnos":[8,10]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[1]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":false,"critico":null,"detalle":"No se identificó quién atiende.","turnos":[]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":false,"critico":null,"detalle":"No preguntó ni exploró la necesidad.","turnos":[]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":false,"critico":null,"detalle":"No resumió lo acordado antes de cerrar.","turnos":[]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":true,"critico":null,"detalle":"Ofreció ayuda adicional.","turnos":[5]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":false,"critico":null,"detalle":"No hubo despedida.","turnos":[]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"10":[{"id":"R1","cumple":false,"critico":null},{"id":"R3","cumple":false,"critico":"cliente"},{"id":"T1","cumple":false,"critico":null},{"id":"B5","cumple":false,"critico":"cliente"}],"2":[{"id":"R2","cumple":false,"critico":null}],"6":[{"id":"B2","cumple":false,"critico":null},{"id":"B2C","cumple":false,"critico":"cliente"}],"8":[{"id":"B2","cumple":false,"critico":null},{"id":"B2C","cumple":false,"critico":"cliente"},{"id":"B5","cumple":false,"critico":"cliente"}],"7":[{"id":"B3","cumple":false,"critico":null}],"9":[{"id":"B3","cumple":false,"critico":null}],"3":[{"id":"B3","cumple":false,"critico":null}],"1":[{"id":"P1","cumple":true,"critico":null}],"5":[{"id":"P6","cumple":true,"critico":null}]},"dimensiones":{"resolucion":0,"esfuerzo":87,"trato":41,"bot":0,"proceso":24,"cumplimiento":null},"recomendaciones":["[R3] Si no puede resolver, nunca termine sin un siguiente paso: radique, escale o agende.","[B2C] Nunca bloquee la salida a humano: la petición repetida debe forzar el traspaso.","[B5] Mida la contención solo cuando el cliente resolvió; si no, debe salir a una persona.","[R1] Cierre cada contacto con una solución confirmada o con un radicado y un plazo concretos.","[B2] Transfiera a una persona como máximo en la segunda respuesta después de que la pidan."],"senales":{"resolucion":"no_resuelto","trayectoria_emocional":"escalada","frustracion_inicial":0.0,"frustracion_final":5.5,"esfuerzo":5,"peticiones_humano":2,"humano_atendido":false,"datos_repedidos":0,"carga_emocional_agente":null}},{"clave":"bot_a_persona_sin_contexto","titulo":"Traspaso que pide la cédula otra vez","contexto":"Chat · fraude · banca","fecha":"miércoles 14/10 10:40","turnos":[{"rol":"bot","texto":"Hola, soy Cori, la asistente virtual de Banco Cordillera. ¿En qué te puedo ayudar?"},{"rol":"cliente","texto":"Tengo un cobro en la tarjeta que no reconozco, de una tienda en línea"},{"rol":"bot","texto":"Para ayudarte, por favor escribe tu número de cédula."},{"rol":"cliente","texto":"1.023.456.789"},{"rol":"bot","texto":"Gracias. Te voy a comunicar con un asesor del área de fraude."},{"rol":"agente","texto":"Buenas tardes, mi nombre es Laura. Por favor me regala su número de cédula."},{"rol":"cliente","texto":"Ya se la di al bot hace un minuto, otra vez??"},{"rol":"agente","texto":"Es necesario para validar la información."},{"rol":"cliente","texto":"1.023.456.789"},{"rol":"agente","texto":"Gracias. Voy a bloquear la tarjeta y radicar la reclamación. Su número de caso es 43-1290348812 y tendrá respuesta en máximo 15 días hábiles."},{"rol":"cliente","texto":"Bueno, gracias."},{"rol":"agente","texto":"Con gusto, que tenga un buen día."}],"puntaje":68,"base":68,"nivel":"Mejorable","criticos":[],"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","cumple":true,"critico":null,"detalle":"No se resolvió en el contacto, pero quedó radicada con número y plazo.","turnos":[10]},{"id":"R2","nombre":"Radicado y plazo ante queja","dimension":"resolucion","cumple":true,"critico":null,"detalle":"Se entregó número de radicado y plazo de respuesta.","turnos":[10]},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","cumple":true,"critico":"cliente","detalle":"El cliente no quedó sin salida.","turnos":[]},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":false,"critico":null,"detalle":"Se pidieron de nuevo datos que el cliente ya había entregado (pérdida de contexto).","turnos":[6]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":false,"critico":null,"detalle":"El cliente tuvo que repetir el mismo mensaje (no fue entendido).","turnos":[9]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"Índice de esfuerzo 3/10.","turnos":[]},{"id":"T1","nombre":"Reconoce la emoción del cliente","dimension":"trato","cumple":false,"critico":null,"detalle":"El cliente mostró frustración y nadie la reconoció.","turnos":[7]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":false,"critico":null,"detalle":"No parafraseó ni confirmó lo que entendió de la solicitud.","turnos":[]},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","cumple":true,"critico":null,"detalle":"Se hizo cargo y ejecutó la solución.","turnos":[10]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"B1","nombre":"El asistente dice que es virtual","dimension":"bot","cumple":true,"critico":null,"detalle":"El asistente se presentó como asistente virtual.","turnos":[]},{"id":"B3","nombre":"Sin bucles del bot","dimension":"bot","cumple":true,"critico":null,"detalle":"Sin bucles del bot.","turnos":[]},{"id":"B4","nombre":"Traspaso con contexto","dimension":"bot","cumple":false,"critico":null,"detalle":"En el traspaso del bot a la persona se perdió el contexto.","turnos":[6]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[1]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":true,"critico":null,"detalle":"Se identificó (nombre o asistente virtual).","turnos":[6]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":true,"critico":null,"detalle":"Indagó la necesidad del cliente.","turnos":[1]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":false,"critico":null,"detalle":"No resumió lo acordado antes de cerrar.","turnos":[]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":false,"critico":null,"detalle":"No ofreció ayuda adicional antes de cerrar.","turnos":[]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":true,"critico":null,"detalle":"Cerró con una despedida cordial.","turnos":[12]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"10":[{"id":"R1","cumple":true,"critico":null},{"id":"R2","cumple":true,"critico":null},{"id":"T3","cumple":true,"critico":null}],"6":[{"id":"E2","cumple":false,"critico":null},{"id":"B4","cumple":false,"critico":null},{"id":"P2","cumple":true,"critico":null}],"9":[{"id":"E5","cumple":false,"critico":null}],"7":[{"id":"T1","cumple":false,"critico":null}],"1":[{"id":"P1","cumple":true,"critico":null},{"id":"P3","cumple":true,"critico":null}],"12":[{"id":"P7","cumple":true,"critico":null}]},"dimensiones":{"resolucion":100,"esfuerzo":61,"trato":50,"bot":65,"proceso":65,"cumplimiento":null},"recomendaciones":["[E2] Lea el historial y lo que el cliente ya dio antes de pedirle datos.","[T1] Nombre la emoción antes de la solución: «Entiendo su molestia, llevar tres días sin servicio es mucho».","[B4] Pase a la persona la intención, los datos verificados y lo ya intentado.","[T2] Parafrasee la solicitud: «Si le entiendo bien, el cobro de octubre no corresponde…».","[E5] Si el cliente repite algo, es señal de que no se le entendió: confirme y cambie de enfoque."],"senales":{"resolucion":"en_tramite","trayectoria_emocional":"estable","frustracion_inicial":0.0,"frustracion_final":0.5,"esfuerzo":3,"peticiones_humano":0,"humano_atendido":null,"datos_repedidos":1,"carga_emocional_agente":0}},{"clave":"bot_a_persona_con_contexto","titulo":"Traspaso bien hecho","contexto":"Chat · fraude · banca","fecha":"miércoles 14/10 10:40","turnos":[{"rol":"bot","texto":"Hola, soy Cori, la asistente virtual de Banco Cordillera. Si en algún momento prefieres hablar con un asesor, escribe «asesor»."},{"rol":"cliente","texto":"Tengo un cobro en la tarjeta que no reconozco"},{"rol":"bot","texto":"Para ayudarte, por favor escribe tu número de cédula."},{"rol":"cliente","texto":"1.023.456.789"},{"rol":"bot","texto":"Gracias. Como es un posible fraude, te comunico con un asesor del área de fraude y le comparto lo que me contaste."},{"rol":"agente","texto":"Hola María, le habla Laura. Ya tengo su información: veo que reporta un cobro no reconocido de una tienda en línea. Lamento mucho la situación, yo me encargo."},{"rol":"cliente","texto":"Gracias, sí, fue ayer por la noche."},{"rol":"agente","texto":"Voy a bloquear la tarjeta ya mismo para que no haya más cobros. Listo, la tarjeta quedó bloqueada. Además radiqué la reclamación con el número de caso 43-1290348812; la respuesta llega en máximo 15 días hábiles. Le recuerdo que nunca le pediremos claves ni códigos."},{"rol":"cliente","texto":"Perfecto, muchas gracias."},{"rol":"agente","texto":"Le confirmo entonces: tarjeta bloqueada y reclamación radicada. ¿Hay algo más en lo que le pueda ayudar?"},{"rol":"cliente","texto":"No, eso es todo."},{"rol":"agente","texto":"Que tenga un excelente día."}],"puntaje":100,"base":100,"nivel":"Excelente","criticos":[],"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","cumple":true,"critico":null,"detalle":"La solicitud quedó resuelta en el contacto.","turnos":[8,9]},{"id":"R2","nombre":"Radicado y plazo ante queja","dimension":"resolucion","cumple":true,"critico":null,"detalle":"La queja se resolvió en el mismo contacto.","turnos":[8,9]},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","cumple":true,"critico":"cliente","detalle":"El cliente no quedó sin salida.","turnos":[]},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se pidieron de nuevo datos que el cliente ya había dado.","turnos":[]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"El cliente no tuvo que repetir su mensaje.","turnos":[]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"Índice de esfuerzo 0/10.","turnos":[]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":true,"critico":null,"detalle":"Confirmó haber entendido (parafraseo o resumen).","turnos":[10]},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","cumple":true,"critico":null,"detalle":"Usó lenguaje de responsabilidad («yo me encargo», «voy a…»).","turnos":[6]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"B1","nombre":"El asistente dice que es virtual","dimension":"bot","cumple":true,"critico":null,"detalle":"El asistente se presentó como asistente virtual.","turnos":[]},{"id":"B3","nombre":"Sin bucles del bot","dimension":"bot","cumple":true,"critico":null,"detalle":"Sin bucles del bot.","turnos":[]},{"id":"B4","nombre":"Traspaso con contexto","dimension":"bot","cumple":true,"critico":null,"detalle":"La persona retomó lo que el cliente ya había dicho al bot.","turnos":[6]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[1]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":true,"critico":null,"detalle":"Se identificó (nombre o asistente virtual).","turnos":[6]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":true,"critico":null,"detalle":"Confirmó la necesidad que el cliente ya había expresado.","turnos":[6]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":true,"critico":null,"detalle":"Resumió o confirmó lo acordado.","turnos":[10]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":true,"critico":null,"detalle":"Ofreció ayuda adicional.","turnos":[10]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":true,"critico":null,"detalle":"Cerró con una despedida cordial.","turnos":[12]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"8":[{"id":"R1","cumple":true,"critico":null},{"id":"R2","cumple":true,"critico":null}],"9":[{"id":"R1","cumple":true,"critico":null},{"id":"R2","cumple":true,"critico":null}],"10":[{"id":"T2","cumple":true,"critico":null},{"id":"P5","cumple":true,"critico":null},{"id":"P6","cumple":true,"critico":null}],"6":[{"id":"T3","cumple":true,"critico":null},{"id":"B4","cumple":true,"critico":null},{"id":"P2","cumple":true,"critico":null},{"id":"P3","cumple":true,"critico":null}],"1":[{"id":"P1","cumple":true,"critico":null}],"12":[{"id":"P7","cumple":true,"critico":null}]},"dimensiones":{"resolucion":100,"esfuerzo":100,"trato":100,"bot":100,"proceso":100,"cumplimiento":null},"recomendaciones":[],"senales":{"resolucion":"resuelto","trayectoria_emocional":"estable","frustracion_inicial":0.0,"frustracion_final":0.0,"esfuerzo":0,"peticiones_humano":0,"humano_atendido":null,"datos_repedidos":0,"carga_emocional_agente":0}},{"clave":"cancelacion_con_retencion","titulo":"Cancelación con trabas","contexto":"Voz · cancelación · telecomunicaciones","fecha":"jueves 15/10 16:05","turnos":[{"rol":"sistema","texto":"Esta llamada puede ser grabada y monitoreada."},{"rol":"agente","texto":"Buenas tardes, le habla Laura de ConectaYa. ¿En qué le puedo ayudar?"},{"rol":"cliente","texto":"Quiero cancelar mi plan de celular, por favor."},{"rol":"agente","texto":"Antes de cancelar, le puedo ofrecer un descuento del 50 % por seis meses."},{"rol":"cliente","texto":"No, gracias, ya lo decidí. Quiero cancelar."},{"rol":"agente","texto":"Le mejoro la oferta: le dejo el plan con el doble de datos al mismo precio. ¿Por qué no lo piensa?"},{"rol":"cliente","texto":"Ya le dije que no. Es la tercera vez que llamo para esto, me tienen cansado."},{"rol":"agente","texto":"Bueno. Le radico la solicitud."},{"rol":"cliente","texto":"Gracias."}],"puntaje":0,"base":55,"nivel":"Crítico","criticos":[{"id":"R3","nombre":"Sin callejón sin salida","categoria":"cliente","detalle":"El cliente terminó sin solución y sin siguiente paso (callejón sin salida)."},{"id":"L7","nombre":"Cancelación sin trabas","categoria":"cumplimiento","detalle":"Ofreció retención antes de radicar la cancelación: el cliente pidió cancelar, no una oferta."}],"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","cumple":false,"critico":null,"detalle":"La solicitud no se resolvió.","turnos":[]},{"id":"R2","nombre":"Radicado y plazo ante queja","dimension":"resolucion","cumple":false,"critico":null,"detalle":"La cancelación no quedó radicada con número (CUN en telecomunicaciones).","turnos":[]},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","cumple":false,"critico":"cliente","detalle":"El cliente terminó sin solución y sin siguiente paso (callejón sin salida).","turnos":[]},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se pidieron de nuevo datos que el cliente ya había dado.","turnos":[]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"El cliente no tuvo que repetir su mensaje.","turnos":[]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"Índice de esfuerzo 0/10.","turnos":[]},{"id":"T1","nombre":"Reconoce la emoción del cliente","dimension":"trato","cumple":false,"critico":null,"detalle":"El cliente mostró frustración y nadie la reconoció.","turnos":[7]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":false,"critico":null,"detalle":"No parafraseó ni confirmó lo que entendió de la solicitud.","turnos":[]},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","cumple":true,"critico":null,"detalle":"Usó lenguaje de responsabilidad («yo me encargo», «voy a…»).","turnos":[4]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[2]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":true,"critico":null,"detalle":"Se identificó (nombre o asistente virtual).","turnos":[2]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":true,"critico":null,"detalle":"Indagó la necesidad del cliente.","turnos":[2]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":false,"critico":null,"detalle":"No resumió lo acordado antes de cerrar.","turnos":[]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":false,"critico":null,"detalle":"No ofreció ayuda adicional antes de cerrar.","turnos":[]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":false,"critico":null,"detalle":"No hubo despedida.","turnos":[]},{"id":"P8","nombre":"Aviso de grabación","dimension":"proceso","cumple":true,"critico":null,"detalle":"Avisó que la llamada se graba.","turnos":[1]},{"id":"L7","nombre":"Cancelación sin trabas","dimension":"cumplimiento","cumple":false,"critico":"cumplimiento","detalle":"Ofreció retención antes de radicar la cancelación: el cliente pidió cancelar, no una oferta.","turnos":[4]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"7":[{"id":"T1","cumple":false,"critico":null}],"4":[{"id":"T3","cumple":true,"critico":null},{"id":"L7","cumple":false,"critico":"cumplimiento"}],"2":[{"id":"P1","cumple":true,"critico":null},{"id":"P2","cumple":true,"critico":null},{"id":"P3","cumple":true,"critico":null}],"1":[{"id":"P8","cumple":true,"critico":null}]},"dimensiones":{"resolucion":0,"esfuerzo":100,"trato":50,"bot":null,"proceso":60,"cumplimiento":null},"recomendaciones":["[R3] Si no puede resolver, nunca termine sin un siguiente paso: radique, escale o agende.","[L7] Radique primero la cancelación y entregue el número; cualquier oferta, después y por otro canal.","[R1] Cierre cada contacto con una solución confirmada o con un radicado y un plazo concretos.","[R2] Ante toda queja o reclamo entregue el número de radicado (CUN en telecomunicaciones) y el plazo legal de respuesta.","[T1] Nombre la emoción antes de la solución: «Entiendo su molestia, llevar tres días sin servicio es mucho»."],"senales":{"resolucion":"no_resuelto","trayectoria_emocional":"escalada","frustracion_inicial":0.0,"frustracion_final":3.5,"esfuerzo":0,"peticiones_humano":0,"humano_atendido":null,"datos_repedidos":0,"carga_emocional_agente":18}},{"clave":"venta_agresiva","titulo":"Venta insistente un domingo","contexto":"Voz saliente · ventas · telecomunicaciones","fecha":"domingo 18/10 20:10","turnos":[{"rol":"agente","texto":"Hola, le hablo de ConectaYa, tenemos una promoción solo por hoy."},{"rol":"cliente","texto":"No me interesa, gracias."},{"rol":"agente","texto":"Pero es la última oportunidad, le regalamos tres meses gratis de televisión."},{"rol":"cliente","texto":"Le dije que no me interesa. ¿Por qué me llaman a esta hora?"},{"rol":"agente","texto":"Le dejo el plan con descuento, es un beneficio exclusivo. Le activo el plan de una vez, ¿listo?"},{"rol":"cliente","texto":"Bueno, ya, como sea."},{"rol":"agente","texto":"Perfecto, bienvenido a la familia ConectaYa, su plan quedó activo."}],"puntaje":0,"base":58,"nivel":"Crítico","criticos":[{"id":"L1","nombre":"Horario legal de contacto","categoria":"cumplimiento","detalle":"Contacto fuera del horario permitido por la Ley 2300 de 2023: 2026-10-18 es domingo."},{"id":"L2","nombre":"Informa el derecho de retracto","categoria":"cumplimiento","detalle":"Cerró una venta a distancia sin informar el derecho de retracto (5 días hábiles)."},{"id":"L3","nombre":"Aceptación expresa de la venta","categoria":"negocio","detalle":"Se dio la venta por cerrada sin una aceptación expresa del cliente."}],"criterios":[{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se pidieron de nuevo datos que el cliente ya había dado.","turnos":[]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"El cliente no tuvo que repetir su mensaje.","turnos":[]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"Índice de esfuerzo 0/10.","turnos":[]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":false,"critico":null,"detalle":"No parafraseó ni confirmó lo que entendió de la solicitud.","turnos":[]},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","cumple":true,"critico":null,"detalle":"Usó lenguaje de responsabilidad («yo me encargo», «voy a…»).","turnos":[5]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[1]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":false,"critico":null,"detalle":"No se identificó quién atiende.","turnos":[]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":false,"critico":null,"detalle":"No preguntó ni exploró la necesidad.","turnos":[]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":false,"critico":null,"detalle":"No resumió lo acordado antes de cerrar.","turnos":[]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":false,"critico":null,"detalle":"No ofreció ayuda adicional antes de cerrar.","turnos":[]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":false,"critico":null,"detalle":"No hubo despedida.","turnos":[]},{"id":"P8","nombre":"Aviso de grabación","dimension":"proceso","cumple":false,"critico":null,"detalle":"No avisó que la llamada se graba o monitorea.","turnos":[]},{"id":"L1","nombre":"Horario legal de contacto","dimension":"cumplimiento","cumple":false,"critico":"cumplimiento","detalle":"Contacto fuera del horario permitido por la Ley 2300 de 2023: 2026-10-18 es domingo.","turnos":[]},{"id":"L2","nombre":"Informa el derecho de retracto","dimension":"cumplimiento","cumple":false,"critico":"cumplimiento","detalle":"Cerró una venta a distancia sin informar el derecho de retracto (5 días hábiles).","turnos":[7]},{"id":"L3","nombre":"Aceptación expresa de la venta","dimension":"cumplimiento","cumple":false,"critico":"negocio","detalle":"Se dio la venta por cerrada sin una aceptación expresa del cliente.","turnos":[7]},{"id":"L4","nombre":"Precio y condiciones claros","dimension":"cumplimiento","cumple":false,"critico":null,"detalle":"Faltó informar: precio, condiciones/permanencia.","turnos":[7]},{"id":"L6","nombre":"Respeta el «no» del cliente","dimension":"cumplimiento","cumple":false,"critico":null,"detalle":"Siguió ofreciendo después de que el cliente dijo que no dos veces.","turnos":[2,4,5]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"5":[{"id":"T3","cumple":true,"critico":null},{"id":"L6","cumple":false,"critico":null}],"1":[{"id":"P1","cumple":true,"critico":null}],"7":[{"id":"L2","cumple":false,"critico":"cumplimiento"},{"id":"L3","cumple":false,"critico":"negocio"},{"id":"L4","cumple":false,"critico":null}],"2":[{"id":"L6","cumple":false,"critico":null}],"4":[{"id":"L6","cumple":false,"critico":null}]},"dimensiones":{"resolucion":null,"esfuerzo":100,"trato":73,"bot":null,"proceso":10,"cumplimiento":0},"recomendaciones":["[L1] Programe las campañas salientes solo de lunes a viernes de 7:00 a 19:00 y sábados de 8:00 a 15:00, sin domingos ni festivos.","[L2] En toda venta telefónica o digital informe los 5 días hábiles para retractarse.","[L3] Pregunte «¿Acepta…?» y espere un «sí, acepto» claro antes de activar.","[L4] Diga el precio total, la permanencia y cuándo cambia el precio promocional.","[L6] Tras dos negativas, agradezca y cierre."],"senales":{"resolucion":"resuelto","trayectoria_emocional":"estable","frustracion_inicial":0.0,"frustracion_final":0.0,"esfuerzo":0,"peticiones_humano":0,"humano_atendido":null,"datos_repedidos":0,"carga_emocional_agente":0}},{"clave":"cliente_hostil_desescalada","titulo":"Cliente furioso que termina calmado","contexto":"Voz · soporte · telecomunicaciones","fecha":"martes 13/10 20:30","turnos":[{"rol":"sistema","texto":"Esta llamada será grabada para fines de calidad."},{"rol":"agente","texto":"Buenas noches, le habla Laura de ConectaYa. ¿En qué le puedo ayudar?"},{"rol":"cliente","texto":"¡¡Llevo cinco días sin servicio, son unos ineptos!! Es la cuarta vez que llamo y nadie me soluciona."},{"rol":"agente","texto":"Tiene toda la razón en estar molesto, cinco días sin servicio es demasiado. Yo me encargo de su caso ahora mismo. ¿Me confirma su número de cédula?"},{"rol":"cliente","texto":"1.023.456.789. Y apúrele que ya estoy harto."},{"rol":"agente","texto":"Gracias. Veo que hay una visita técnica que nunca se programó. Voy a escalarlo como prioritario y agendar la visita para mañana a las 8:00 a. m."},{"rol":"cliente","texto":"¿Y si no vienen otra vez?"},{"rol":"agente","texto":"Le dejo el número de radicado 43-1290348812 y mi compromiso: si la visita no se cumple, le aplicamos el descuento por los días sin servicio. Le confirmo: visita mañana a las 8:00 a. m."},{"rol":"cliente","texto":"Bueno, gracias. Disculpe la grosería, es que estoy desesperado."},{"rol":"agente","texto":"No se preocupe, lo entiendo. ¿Hay algo más en lo que le pueda ayudar?"},{"rol":"cliente","texto":"No, gracias."},{"rol":"agente","texto":"Que tenga una buena noche."}],"puntaje":100,"base":100,"nivel":"Excelente","criticos":[],"criterios":[{"id":"R1","nombre":"Resuelve o deja trámite formal","dimension":"resolucion","cumple":true,"critico":null,"detalle":"No se resolvió en el contacto, pero quedó radicada con número y plazo.","turnos":[6,8]},{"id":"R3","nombre":"Sin callejón sin salida","dimension":"resolucion","cumple":true,"critico":"cliente","detalle":"El cliente no quedó sin salida.","turnos":[]},{"id":"E1","nombre":"Máximo una transferencia","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 transferencia(s) entre áreas.","turnos":[]},{"id":"E2","nombre":"No pide datos ya entregados","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se pidieron de nuevo datos que el cliente ya había dado.","turnos":[]},{"id":"E3","nombre":"No manda a otro canal sin resolver","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"No se envió al cliente a otro canal.","turnos":[]},{"id":"E4","nombre":"Esperas razonables","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"0 espera(s).","turnos":[]},{"id":"E5","nombre":"El cliente no repite su mensaje","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"El cliente no tuvo que repetir su mensaje.","turnos":[]},{"id":"E6","nombre":"Esfuerzo total bajo","dimension":"esfuerzo","cumple":true,"critico":null,"detalle":"Índice de esfuerzo 0/10.","turnos":[]},{"id":"T1","nombre":"Reconoce la emoción del cliente","dimension":"trato","cumple":true,"critico":null,"detalle":"Reconoció la emoción o la molestia del cliente.","turnos":[4]},{"id":"T2","nombre":"Escucha activa","dimension":"trato","cumple":true,"critico":null,"detalle":"Confirmó haber entendido (parafraseo o resumen).","turnos":[8]},{"id":"T3","nombre":"Se hace cargo del caso","dimension":"trato","cumple":true,"critico":null,"detalle":"Usó lenguaje de responsabilidad («yo me encargo», «voy a…»).","turnos":[4]},{"id":"T4","nombre":"Sin culpar ni negar sin alternativa","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin frases que culpen al cliente ni negativas sin alternativa.","turnos":[]},{"id":"T5","nombre":"Trato respetuoso","dimension":"trato","cumple":true,"critico":"cliente","detalle":"Trato respetuoso.","turnos":[]},{"id":"T6","nombre":"Baja la frustración","dimension":"trato","cumple":true,"critico":null,"detalle":"La frustración bajó de 10 a 0.0 (de 10).","turnos":[]},{"id":"T7","nombre":"Empatía real, no de plantilla","dimension":"trato","cumple":true,"critico":null,"detalle":"Sin disculpas de plantilla repetidas.","turnos":[]},{"id":"P1","nombre":"Saludo","dimension":"proceso","cumple":true,"critico":null,"detalle":"Saludó al iniciar.","turnos":[2]},{"id":"P2","nombre":"Identificación de quien atiende","dimension":"proceso","cumple":true,"critico":null,"detalle":"Se identificó (nombre o asistente virtual).","turnos":[2]},{"id":"P3","nombre":"Indaga la necesidad","dimension":"proceso","cumple":true,"critico":null,"detalle":"Indagó la necesidad del cliente.","turnos":[2]},{"id":"P5","nombre":"Resume lo acordado","dimension":"proceso","cumple":true,"critico":null,"detalle":"Resumió o confirmó lo acordado.","turnos":[8]},{"id":"P6","nombre":"Ofrece ayuda adicional","dimension":"proceso","cumple":true,"critico":null,"detalle":"Ofreció ayuda adicional.","turnos":[10]},{"id":"P7","nombre":"Despedida cordial","dimension":"proceso","cumple":true,"critico":null,"detalle":"Cerró con una despedida cordial.","turnos":[12]},{"id":"P8","nombre":"Aviso de grabación","dimension":"proceso","cumple":true,"critico":null,"detalle":"Avisó que la llamada se graba.","turnos":[1]},{"id":"L9","nombre":"Nunca pide claves ni códigos","dimension":"cumplimiento","cumple":true,"critico":"negocio","detalle":"No pidió claves, PIN ni códigos de seguridad.","turnos":[]}],"anotaciones":{"8":[{"id":"R1","cumple":true,"critico":null},{"id":"T2","cumple":true,"critico":null},{"id":"P5","cumple":true,"critico":null}],"6":[{"id":"R1","cumple":true,"critico":null}],"4":[{"id":"T1","cumple":true,"critico":null},{"id":"T3","cumple":true,"critico":null}],"2":[{"id":"P1","cumple":true,"critico":null},{"id":"P2","cumple":true,"critico":null},{"id":"P3","cumple":true,"critico":null}],"10":[{"id":"P6","cumple":true,"critico":null}],"12":[{"id":"P7","cumple":true,"critico":null}],"1":[{"id":"P8","cumple":true,"critico":null}]},"dimensiones":{"resolucion":100,"esfuerzo":100,"trato":100,"bot":null,"proceso":100,"cumplimiento":null},"recomendaciones":[],"senales":{"resolucion":"en_tramite","trayectoria_emocional":"desescalada","frustracion_inicial":10.0,"frustracion_final":0.0,"esfuerzo":0,"peticiones_humano":0,"humano_atendido":null,"datos_repedidos":0,"carga_emocional_agente":33}}],"comparacion":[{"id":"I01","nombre":"Resolución en el contacto","unidad":"%","sentido":"mayor","antes":0.44972067039106145,"despues":0.8152173913043478,"diferencia":0.36549672091328633,"p_valor":1.502591459705763e-24,"veredicto":"mejora significativa","n_antes":358,"n_despues":368},{"id":"I02","nombre":"Recontacto en 7 días","unidad":"%","sentido":"menor","antes":0.2080536912751678,"despues":0.07371794871794872,"diferencia":-0.13433574255721908,"p_valor":1.6754104857663057e-06,"veredicto":"mejora significativa","n_antes":298,"n_despues":312},{"id":"I03","nombre":"Peticiones de humano atendidas","unidad":"%","sentido":"mayor","antes":0.14285714285714285,"despues":0.6530612244897959,"diferencia":0.510204081632653,"p_valor":2.4781265428762776e-07,"veredicto":"mejora significativa","n_antes":49,"n_despues":49},{"id":"I04","nombre":"Respuestas del bot hasta la persona","unidad":"pasos","sentido":"menor","antes":1.0,"despues":1.0,"diferencia":0.0,"p_valor":null,"veredicto":"sin datos suficientes","n_antes":7,"n_despues":32},{"id":"I05","nombre":"Bucles del bot","unidad":"%","sentido":"menor","antes":0.3620689655172414,"despues":0.10493827160493827,"diferencia":-0.25713069391230314,"p_valor":2.33733151397133e-07,"veredicto":"mejora significativa","n_antes":116,"n_despues":162},{"id":"I06","nombre":"Contención falsa","unidad":"%","sentido":"menor","antes":0.5753424657534246,"despues":0.20987654320987653,"diferencia":-0.3654659225435481,"p_valor":3.1889903770798773e-06,"veredicto":"mejora significativa","n_antes":73,"n_despues":81},{"id":"I07","nombre":"Pérdida de contexto","unidad":"%","sentido":"menor","antes":0.859375,"despues":0.2391304347826087,"diferencia":-0.6202445652173914,"p_valor":2.5041053454979e-14,"veredicto":"mejora significativa","n_antes":64,"n_despues":92},{"id":"I08","nombre":"Desescalada de clientes frustrados","unidad":"%","sentido":"mayor","antes":0.6756756756756757,"despues":0.8085106382978723,"diferencia":0.13283496262219663,"p_valor":0.0907904988846942,"veredicto":"sin cambio concluyente","n_antes":111,"n_despues":47},{"id":"I09","nombre":"Frustración que escala","unidad":"%","sentido":"menor","antes":0.19,"despues":0.0625,"diferencia":-0.1275,"p_valor":5.668635059582991e-08,"veredicto":"mejora significativa","n_antes":400,"n_despues":400},{"id":"I10","nombre":"Libre de error crítico: cliente","unidad":"%","sentido":"mayor","antes":0.763681592039801,"despues":0.92,"diferencia":0.15631840796019902,"p_valor":1.3361709907271594e-09,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I11","nombre":"Libre de error crítico: negocio","unidad":"%","sentido":"mayor","antes":0.9228855721393034,"despues":1.0,"diferencia":0.07711442786069655,"p_valor":1.4749614934361373e-08,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I12","nombre":"Libre de error crítico: cumplimiento","unidad":"%","sentido":"mayor","antes":0.8557213930348259,"despues":0.98,"diferencia":0.12427860696517412,"p_valor":1.5187988548429186e-10,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I13","nombre":"Esfuerzo alto del cliente","unidad":"%","sentido":"menor","antes":0.15671641791044777,"despues":0.07,"diferencia":-0.08671641791044776,"p_valor":0.00010818041440897132,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I14","nombre":"Amenaza de queja externa","unidad":"%","sentido":"menor","antes":0.236318407960199,"despues":0.07,"diferencia":-0.166318407960199,"p_valor":6.337020706775543e-11,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I15","nombre":"Abandono sin solución","unidad":"%","sentido":"menor","antes":0.14676616915422885,"despues":0.0475,"diferencia":-0.09926616915422885,"p_valor":2.0987595606037833e-06,"veredicto":"mejora significativa","n_antes":402,"n_despues":400},{"id":"I16","nombre":"Puntaje de calidad promedio","unidad":"pts","sentido":"mayor","antes":54.507462686567166,"despues":86.9575,"diferencia":32.45003731343283,"p_valor":2.239800631551063e-35,"veredicto":"mejora significativa","n_antes":402,"n_despues":400}],"n_antes":402,"n_despues":400,"contencion":{"antes":{"conversaciones_con_bot":116,"contencion_bruta":0.6293103448275862,"contencion_real":0.2672413793103448},"despues":{"conversaciones_con_bot":162,"contencion_bruta":0.5,"contencion_real":0.3950617283950617}},"evaluacion":[{"conjunto":"v1","casos":30,"senales":48,"exactitud":0.77,"momento":"escrito a mano antes de ajustar las reglas (línea base)","ciego":true},{"conjunto":"v2 ciego","casos":29,"senales":40,"exactitud":0.65,"momento":"escrito después de ajustar con v1 y antes de volver a tocar el motor","ciego":true}],"archivos_py":["__init__.py","calendario.py","calibracion.py","cargar.py","cli.py","detectores.py","estadistica.py","indicadores.py","informe.py","lexicos.py","modelos.py","motor.py","privacidad.py","rubrica.py","sintetico.py","texto.py"]};
+const $ = (s) => document.querySelector(s);
+const esc = (t) => String(t ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const pct = (x, d = 0) => x == null ? "—" : (100 * x).toFixed(d).replace(".", ",") + " %";
+const CRIT = Object.fromEntries(DATOS.criterios.map((c) => [c.id, c]));
+const ROLES = {cliente: "Cliente", agente: "Agente", bot: "Bot", sistema: "Sistema"};
+
+function nivelClase(n) { return n === "Crítico" || n === "Deficiente" ? "critico" : n === "Mejorable" ? "medio" : "bueno"; }
+
+function medidor(puntaje, base, nivel) {
+  const ang = -90 + 180 * Math.max(0, Math.min(100, puntaje)) / 100;
+  const arco = (a0, a1, color) => {
+    const p = (a) => [100 + 80 * Math.cos((a - 180) * Math.PI / 180), 100 + 80 * Math.sin((a - 180) * Math.PI / 180)];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    return `<path d="M${x0.toFixed(1)} ${y0.toFixed(1)} A80 80 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)}" fill="none" stroke="${color}" stroke-width="14"/>`;
+  };
+  const marcas = [0, 60, 75, 90, 100].map((v) => {
+    const a = (v / 100) * 180 - 180, r = a * Math.PI / 180;
+    const x = 100 + 100 * Math.cos(r), y = 100 + 100 * Math.sin(r);
+    return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--ink-3)">${v}</text>`;
+  }).join("");
+  const nota = base !== puntaje ? `<span class="nota">Nota base ${base} · anulada por error crítico</span>` : `<span class="nota">Nota de calidad sobre 100</span>`;
+  return `<svg viewBox="-12 0 224 118" role="img" aria-label="Puntaje ${puntaje} de 100, nivel ${esc(nivel)}">
+      ${arco(0, 108, "var(--bad-wash)")}${arco(108, 135, "var(--signal-wash)")}${arco(135, 162, "var(--good-wash)")}${arco(162, 180, "var(--good)")}
+      ${marcas}
+      <g class="aguja" style="transform-origin:100px 100px;transform:rotate(${ang}deg)"><line x1="100" y1="100" x2="100" y2="30" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round"/><line x1="100" y1="58" x2="100" y2="30" stroke="var(--signal)" stroke-width="3.5" stroke-linecap="round"/></g>
+      <circle cx="100" cy="100" r="7" fill="var(--ink)"/>
+    </svg>
+    <div class="valor num">${puntaje}</div><span class="nivel ${nivelClase(nivel)}">${esc(nivel)}</span>${nota}`;
+}
+
+function transcripcion(ej, maxTurnos) {
+  const turnos = maxTurnos ? ej.turnos.slice(0, maxTurnos) : ej.turnos;
+  return turnos.map((t, i) => {
+    const anot = (ej.anotaciones[i + 1] || []);
+    const falla = anot.some((a) => a.cumple === false);
+    const chips = anot.map((a) => {
+      const c = CRIT[a.id];
+      const titulo = `${a.id} · ${c ? c.nombre : ""}${a.cumple === false ? " · falla" : " · cumple"}`;
+      return `<span class="chip ${a.cumple === false ? "falla" : "ok"}" title="${esc(titulo)}">${a.cumple === false ? "✕" : "✓"} ${esc(a.id)}</span>`;
+    }).join("");
+    return `<div class="turno ${t.rol === "cliente" ? "cliente" : ""} ${falla ? "marcado" : ""}">
+      <span class="n">T${i + 1}</span><span class="rol">${ROLES[t.rol] || esc(t.rol)}</span>
+      <div class="txt">${esc(t.texto)}${chips ? `<div class="chips">${chips}</div>` : ""}</div></div>`;
+  }).join("");
+}
+
+function listaCriticos(ej) {
+  if (!ej.criticos.length) return `<li><b style="color:var(--good)">OK</b><span>Sin errores críticos.</span></li>`;
+  return ej.criticos.map((c) => `<li><b>${esc(c.id)}</b><span><strong>${esc(c.nombre)}</strong> (${esc(c.categoria)}). ${esc(c.detalle)}</span></li>`).join("");
+}
+
+function pintarHero() {
+  const n = DATOS.criterios.length, k = DATOS.criterios.filter((c) => c.critico).length;
+  $("#cifras").innerHTML = `<div><b class="num">${n}</b><span>criterios de revisión</span></div><div><b class="num">${k}</b><span>errores críticos</span></div>
+    <div><b class="num">${DATOS.indicadores.length}</b><span>indicadores con meta</span></div><div><b>0</b><span>datos enviados a internet</span></div>`;
+  $("#paso-rubrica").textContent = `${n} criterios en seis dimensiones y ${k} errores críticos que anulan la nota.`;
+  $("#criterios-titulo").textContent = `${n} criterios objetivos de revisión`;
+  const ej = DATOS.ejemplos[0];
+  $("#hero-panel").innerHTML = `<div class="cabeza"><span class="etiqueta">${esc(ej.contexto)}</span><span class="etiqueta">${esc(ej.fecha)}</span></div>
+    <div class="transcripcion">${transcripcion(ej, 8)}</div>
+    <div class="resultado" style="border-top:1px solid var(--line)"><div class="medidor">${medidor(ej.puntaje, ej.base, ej.nivel)}</div><ul class="lista-criticos">${listaCriticos(ej)}</ul></div>`;
+}
+
+const PROBLEMAS = [
+  ["El bot no deja llegar a una persona", "B2 · B2C · I03"], ["Bucles: «no te entendí» una y otra vez", "B3 · I05"],
+  ["Contención falsa: el cliente se rinde y vuelve por otro canal", "B5 · I06"], ["Volver a dictar la cédula tras el traspaso", "E2 · B4 · I07"],
+  ["«Llame más tarde», «eso no es conmigo», «vaya a una oficina»", "R1 · R3 · E3"], ["Parecía resuelto, pero el cliente vuelve", "I02"],
+  ["Cancelaciones con ofertas en vez de radicar", "L7"], ["Llamadas de venta y cobranza a cualquier hora", "L1 · alertas"],
+  ["Cobranza con amenazas o llamadas a la familia", "L8"], ["Pedir claves o códigos: la puerta del fraude", "L9"],
+  ["Nadie reconoce la molestia del cliente", "T1 · T6"], ["Agentes que absorben insultos sin apoyo", "carga emocional"],
+];
+
+function pintarProblemas() {
+  $("#problemas").innerHTML = PROBLEMAS.map(([p, ids]) => `<div class="problema"><span>${esc(p)}</span><span class="ids">${esc(ids)}</span></div>`).join("");
+}
+
+let actual = 0;
+function pintarDemo(i) {
+  actual = i;
+  const ej = DATOS.ejemplos[i];
+  document.querySelectorAll("#selector button").forEach((b, j) => b.setAttribute("aria-pressed", String(j === i)));
+  mostrarEvaluacion(ej);
+}
+
+function mostrarEvaluacion(ej) {
+  $("#demo-titulo").textContent = ej.titulo;
+  const s = ej.senales;
+  const res = {resuelto: "resuelto", en_tramite: "en trámite", no_resuelto: "no resuelto", incierto: "sin evidencia de resolución"}[s.resolucion] || s.resolucion;
+  $("#demo-meta").innerHTML = [ej.contexto, ej.fecha, `Resolución: ${res}`, `Emoción: ${s.trayectoria_emocional}`, `Esfuerzo: ${s.esfuerzo}/10`]
+    .filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join("");
+  $("#demo-transcripcion").innerHTML = transcripcion(ej);
+  $("#demo-medidor").innerHTML = medidor(ej.puntaje, ej.base, ej.nivel);
+  $("#demo-criticos").innerHTML = listaCriticos(ej);
+  $("#demo-dims").innerHTML = Object.entries(DATOS.dimensiones).map(([k, nombre]) => {
+    const v = ej.dimensiones[k];
+    return `<div class="dim"><span>${esc(nombre)}</span><div class="barra" title="${esc(nombre)}: ${v == null ? "no aplica" : v + " de 100"}"><i style="width:${v ?? 0}%"></i></div><span class="num" style="text-align:right">${v == null ? "—" : v}</span></div>`;
+  }).join("");
+  $("#demo-recs").innerHTML = ej.recomendaciones.length ? ej.recomendaciones.map((r) => `<li>${esc(r)}</li>`).join("") : "<li>Nada que corregir en esta conversación.</li>";
+}
+
+function pintarSelector() {
+  $("#selector").innerHTML = DATOS.ejemplos.map((e, i) => `<button type="button" aria-pressed="false" data-i="${i}">${esc(e.titulo)}</button>`).join("");
+  $("#selector").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b) pintarDemo(+b.dataset.i); });
+}
+
+function pintarCriterios() {
+  $("#dimensiones").innerHTML = Object.entries(DATOS.dimensiones).map(([k, nombre]) => {
+    const cs = DATOS.criterios.filter((c) => c.dimension === k);
+    return `<div class="tarjeta"><h3>${esc(nombre)} <span class="etiqueta" style="margin-left:6px">${cs.length} criterios</span></h3>${cs.map((c) => `
+      <details class="crit"><summary><span class="id">${esc(c.id)}</span><span>${esc(c.nombre)}</span>
+      <span class="peso ${c.critico ? "critico" : ""}">${c.critico ? "crítico · " + esc(c.critico) : c.peso + " pts"}</span></summary>
+      <div class="cuerpo"><p><b>Qué hacer si falla:</b> ${esc(c.recomendacion)}</p><p><b>Fundamento:</b> ${esc(c.fundamento)}</p></div></details>`).join("")}</div>`;
+  }).join("");
+}
+
+function fmtValor(v, u) { return v == null ? "—" : u === "%" ? pct(v, 1) : v.toFixed(1).replace(".", ","); }
+
+function pintarVerificacion() {
+  const ind = Object.fromEntries(DATOS.indicadores.map((i) => [i.id, i]));
+  const filas = DATOS.comparacion.map((f) => {
+    const i = ind[f.id];
+    const meta = (i.sentido === "mayor" ? "≥ " : "≤ ") + (i.unidad === "%" ? pct(i.meta) : String(i.meta).replace(".", ","));
+    const dif = f.diferencia == null ? "—" : (f.unidad === "%" ? (f.diferencia >= 0 ? "+" : "−") + Math.abs(100 * f.diferencia).toFixed(1).replace(".", ",") + " pp" : (f.diferencia >= 0 ? "+" : "−") + Math.abs(f.diferencia).toFixed(1).replace(".", ","));
+    const cls = f.veredicto.startsWith("mejora") ? "mejora" : f.veredicto.startsWith("empeora") ? "empeora" : "";
+    return `<tr><td><b>${esc(f.nombre)}</b><br><span class="nota">${esc(i.formula)}</span></td><td class="num">${meta}</td>
+      <td class="num">${fmtValor(f.antes, f.unidad)}</td><td class="num">${fmtValor(f.despues, f.unidad)}</td><td class="num">${dif}</td>
+      <td><span class="veredicto ${cls}"><i></i>${esc(f.veredicto)}</span></td></tr>`;
+  }).join("");
+  $("#tabla-comparacion").innerHTML = `<thead><tr><th>Indicador</th><th>Meta</th><th>Antes</th><th>Después</th><th>Cambio</th><th>Veredicto (IC 95 %)</th></tr></thead><tbody>${filas}</tbody>`;
+  $("#nota-comparacion").textContent = `Ejemplo con datos sintéticos: ${DATOS.n_antes} conversaciones de una operación típica frente a ${DATOS.n_despues} de la misma operación tras aplicar las recomendaciones. Así se ve la salida de «alometro comparar».`;
+  const c = DATOS.contencion;
+  const fila = (et, v, cls) => `<div class="fila"><span>${et}</span><div class="barra"><i class="${cls}" style="width:${(v ?? 0) * 100}%"></i></div><span class="num" style="text-align:right">${pct(v)}</span></div>`;
+  $("#contencion").innerHTML = `<p class="etiqueta">Antes</p>${fila("Aparente", c.antes.contencion_bruta, "aparente")}${fila("Real", c.antes.contencion_real, "real")}
+    <p class="etiqueta" style="margin-top:6px">Después</p>${fila("Aparente", c.despues.contencion_bruta, "aparente")}${fila("Real", c.despues.contencion_real, "real")}`;
+  $("#tabla-precision").innerHTML = `<thead><tr><th>Conjunto</th><th>Señales</th><th>Exactitud</th></tr></thead><tbody>${DATOS.evaluacion.map((e) =>
+    `<tr><td><b>${esc(e.conjunto)}</b><br><span class="nota">${esc(e.momento)}</span></td><td class="num">${e.senales}</td><td class="num">${pct(e.exactitud)}</td></tr>`).join("")}</tbody>`;
+  $("#version").textContent = "v" + DATOS.version;
+}
+
+/* ---------- Demo en vivo (Pyodide; solo en la versión de GitHub Pages) ---------- */
+const PY_EVAL = `
+import json
+from alometro.cargar import desde_txt
+from alometro.motor import evaluar
+from alometro.calendario import HORA_COLOMBIA
+def _evaluar(texto):
+    c = desde_txt(texto, "tu-conversacion")
+    e = evaluar(c)
+    anot = {}
+    for cr in e.criterios:
+        if not cr.aplica:
+            continue
+        for ev in cr.evidencias:
+            lst = anot.setdefault(ev.turno, [])
+            if not any(x["id"] == cr.id for x in lst):
+                lst.append({"id": cr.id, "cumple": cr.cumple, "critico": cr.critico})
+    s = e.senales
+    return json.dumps({"titulo": "Tu conversación", "contexto": f"{c.canal} · {c.tipo} · {c.sector}", "fecha": "",
+        "turnos": [{"rol": t.rol, "texto": t.texto} for t in c.turnos], "puntaje": e.puntaje, "base": e.puntaje_base, "nivel": e.nivel,
+        "criticos": [{"id": x["criterio"], "nombre": x["nombre"], "categoria": x["categoria"], "detalle": x["detalle"]} for x in e.errores_criticos],
+        "anotaciones": anot, "dimensiones": e.dimensiones, "recomendaciones": e.recomendaciones,
+        "senales": {k: s[k] for k in ("resolucion", "trayectoria_emocional", "esfuerzo")}}, ensure_ascii=False)
+`;
+let py = null;
+async function cargarMotor() {
+  if (py) return py;
+  $("#vivo-estado").textContent = "Cargando Python en tu navegador (unos segundos la primera vez)…";
+  await new Promise((ok, mal) => {
+    const s = document.createElement("script");
+    s.src = "vendor/pyodide/pyodide.js";
+    s.onload = ok;
+    s.onerror = () => mal(new Error("no se pudo descargar el intérprete de Python (vendor/pyodide). Revisa la conexión y recarga la página."));
+    document.head.appendChild(s);
+  });
+  const p = await loadPyodide({indexURL: new URL("vendor/pyodide/", location.href).href});
+  p.FS.mkdirTree("/home/pyodide/alometro");
+  for (const f of DATOS.archivos_py) {
+    const r = await fetch("py/alometro/" + f);
+    if (!r.ok) throw new Error("No se pudo cargar " + f);
+    p.FS.writeFile("/home/pyodide/alometro/" + f, await r.text());
+  }
+  p.runPython("import sys; sys.path.insert(0, '/home/pyodide')\n" + PY_EVAL);
+  py = p;
+  return p;
+}
+
+function prepararVivo() {
+  const boton = $("#vivo-boton");
+  if (!window.ALOMETRO_VIVO) {
+    $("#vivo-intro").textContent = "En esta vista previa el motor no puede ejecutarse. Instala el paquete (sección Uso) y ejecuta «alometro evaluar» sobre tu archivo, o abre la página publicada en GitHub Pages, donde el motor corre dentro de tu navegador.";
+    boton.disabled = true; boton.style.opacity = .5; boton.style.cursor = "not-allowed";
+    return;
+  }
+  $("#vivo-intro").textContent = "El motor real de Alómetro (Python) corre dentro de tu navegador: el texto no sale de tu equipo. Escribe o pega la conversación; la primera línea puede indicar tipo, canal y sector.";
+  boton.addEventListener("click", async () => {
+    boton.disabled = true;
+    try {
+      const p = await cargarMotor();
+      p.globals.set("TEXTO", $("#vivo-texto").value);
+      const ej = JSON.parse(p.runPython("_evaluar(TEXTO)"));
+      if (!ej.turnos.length) throw new Error("No encontré turnos. Usa una línea por turno con el formato «Cliente: texto».");
+      document.querySelectorAll("#selector button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      mostrarEvaluacion(ej);
+      $("#vivo-estado").textContent = `Listo: ${ej.puntaje}/100 (${ej.nivel}). El resultado está arriba.`;
+      $("#demo-titulo").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+    } catch (e) {
+      $("#vivo-estado").textContent = "No se pudo evaluar: " + (e.message || e);
+    } finally { boton.disabled = false; }
+  });
+}
+
+pintarHero(); pintarProblemas(); pintarSelector(); pintarDemo(0); pintarCriterios(); pintarVerificacion(); prepararVivo();
+</script>
+</body>
+</html>

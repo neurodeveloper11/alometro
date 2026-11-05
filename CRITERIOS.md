@@ -29,6 +29,7 @@
 | E3 | No manda a otro canal sin resolver | 6 | Si otro canal es necesario, deje radicado el caso antes de enviarlo allí. | Desviar al cliente («escriba al correo», «vaya a una oficina») traslada el esfuerzo al cliente. |
 | E4 | Esperas razonables | 4 | Agrupe las consultas internas para no poner al cliente en espera varias veces. | Varias esperas seguidas indican que quien atiende no tiene la información a mano y alargan el contacto. |
 | E5 | El cliente no repite su mensaje | 5 | Si el cliente repite algo, es señal de que no se le entendió: confirme y cambie de enfoque. | La repetición es un indicador directo de comprensión fallida. |
+| E6 | Esfuerzo total bajo | 5 | Revise el recorrido completo: cada obstáculo suma (transferencia, espera, desvío, bucle, dato repetido). | Índice de esfuerzo 0-10 de Alómetro, inspirado en el Customer Effort Score (CES). |
 
 ### Trato humano
 
@@ -93,7 +94,7 @@ Las metas son **puntos de partida**; fíjelas con 4 semanas de línea base de su
 | I04 | Respuestas del bot hasta la persona | mediana de respuestas del bot entre la petición y la persona | ≤ 2 pasos | Cada respuesta extra del bot después de pedir una persona aumenta la frustración. |
 | I05 | Bucles del bot | conversaciones con bucle / conversaciones con bot | ≤ 5 % | El bucle sin salida es la experiencia que hace sentir que «el servicio al cliente no sirve». |
 | I06 | Contención falsa | conversaciones solo-bot sin solución o con recontacto / conversaciones solo-bot | ≤ 10 % | Separa la contención real (el bot resolvió) de la aparente (el cliente se rindió o volvió por otro canal). |
-| I07 | Pérdida de contexto | conversaciones donde se repidieron datos / conversaciones con traspaso | ≤ 10 % | Repetir datos tras el traspaso es la falla que más destruye la confianza en el bot. |
+| I07 | Pérdida de contexto | conversaciones donde se repidieron datos / conversaciones con traspaso | ≤ 10 % | Escalar sin perder el contexto es lo que más valoran los usuarios de chatbots bancarios en Colombia (63 %, Delto 2025). |
 | I08 | Desescalada de clientes frustrados | clientes que terminan menos frustrados / clientes que empezaron frustrados | ≥ 60 % | Mide si la atención calma o enciende. Es la competencia humana que un bot no reemplaza. |
 | I09 | Frustración que escala | conversaciones donde la frustración sube / conversaciones con 2+ turnos del cliente | ≤ 10 % | La conversación no debería empeorar el ánimo del cliente. |
 | I10 | Libre de error crítico: cliente | interacciones sin error crítico de cliente / total | ≥ 95 % | Callejón sin salida, humano negado, irrespeto o contención falsa. |

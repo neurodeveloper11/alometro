@@ -1,0 +1,4 @@
+[
+  {"conjunto": "v1", "casos": 30, "senales": 48, "exactitud": 0.77, "momento": "escrito a mano antes de ajustar las reglas (línea base)", "ciego": true},
+  {"conjunto": "v2 ciego", "casos": 29, "senales": 40, "exactitud": 0.65, "momento": "escrito después de ajustar con v1 y antes de volver a tocar el motor", "ciego": true}
+]

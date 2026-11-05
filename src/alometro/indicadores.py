@@ -167,7 +167,7 @@ INDICADORES = [
           "Separa la contención real (el bot resolvió) de la aparente (el cliente se rindió o volvió por otro canal).",
           SOLO_BOT, lambda e, c: ((cr := _criterio(e, "B5")) is not None and cr.cumple is False) or c["recontacto"].get(e.conversacion_id) is True),
     _prop("I07", "Pérdida de contexto", "conversaciones donde se repidieron datos / conversaciones con traspaso", "menor", 0.10,
-          "Repetir datos tras el traspaso es la falla que más destruye la confianza en el bot.",
+          "Escalar sin perder el contexto es lo que más valoran los usuarios de chatbots bancarios en Colombia (63 %, Delto 2025).",
           lambda e, c: (bool(_s(e, "hubo_bot")) and bool(_s(e, "hubo_agente"))) or (_s(e, "transferencias") or 0) > 0,
           lambda e, c: (_s(e, "datos_repedidos") or 0) > 0),
     _prop("I08", "Desescalada de clientes frustrados", "clientes que terminan menos frustrados / clientes que empezaron frustrados", "mayor", 0.60,

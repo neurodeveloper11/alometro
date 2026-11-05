@@ -141,6 +141,12 @@ def e5_repeticion(c: Conversacion, s: Senales) -> Resultado:
     return _falla("El cliente tuvo que repetir el mismo mensaje (no fue entendido).", s.repeticiones_cliente)
 
 
+def e6_esfuerzo_total(c: Conversacion, s: Senales) -> Resultado:
+    if s.esfuerzo <= 4:
+        return _ok(f"Índice de esfuerzo {s.esfuerzo}/10.")
+    return _falla(f"Índice de esfuerzo {s.esfuerzo}/10: la suma de transferencias, esperas, desvíos, bucles y repeticiones fue alta.")
+
+
 # ------------------------------- Trato --------------------------------------
 def t1_validacion(c: Conversacion, s: Senales) -> Resultado:
     if s.frustracion_max < 3:
@@ -394,6 +400,9 @@ CRITERIOS: list[Criterio] = [
     Criterio("E5", "El cliente no repite su mensaje", "esfuerzo", 5, None, e5_repeticion,
              "Si el cliente repite algo, es señal de que no se le entendió: confirme y cambie de enfoque.",
              "La repetición es un indicador directo de comprensión fallida."),
+    Criterio("E6", "Esfuerzo total bajo", "esfuerzo", 5, None, e6_esfuerzo_total,
+             "Revise el recorrido completo: cada obstáculo suma (transferencia, espera, desvío, bucle, dato repetido).",
+             "Índice de esfuerzo 0-10 de Alómetro, inspirado en el Customer Effort Score (CES)."),
     Criterio("T1", "Reconoce la emoción del cliente", "trato", 10, None, t1_validacion,
              "Nombre la emoción antes de la solución: «Entiendo su molestia, llevar tres días sin servicio es mucho».",
              "Validación emocional: reduce la activación y abre la escucha (base de la desescalada)."),

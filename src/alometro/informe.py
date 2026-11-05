@@ -6,6 +6,7 @@ import html
 import json
 from datetime import datetime
 
+from .calendario import HORA_COLOMBIA
 from .indicadores import Indicador
 from .modelos import Evaluacion
 from .rubrica import CRITERIOS_POR_ID, DIMENSIONES
@@ -71,7 +72,7 @@ def generar_html(evs: list[Evaluacion], resumen: dict, titulo: str = "Informe Al
     partes = [f"<!doctype html><html lang='es'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'>"
               f"<title>{E(titulo)}</title><style>{_CSS}</style></head><body><main>"]
     partes.append(f"<h1>{E(titulo)}</h1><p class='sub'>{resumen['n']} interacciones evaluadas"
-                  f"{(' · ' + E(fuente)) if fuente else ''} · generado el {datetime.now():%d/%m/%Y %H:%M}. "
+                  f"{(' · ' + E(fuente)) if fuente else ''} · generado el {datetime.now(HORA_COLOMBIA):%d/%m/%Y %H:%M} (hora de Colombia). "
                   "Las metas son puntos de partida: ajústelas con la línea base de su operación.</p>")
 
     # --- Indicadores ---

@@ -333,6 +333,8 @@ VENTA_CERRADA = compilar([
     r"\bprocedo (con|a) (la |el )?(activacion|venta|instalacion|compra|registro|afiliacion)\b",
     r"\bfelicitaciones por (su|tu) (compra|nuevo|nueva|plan)\b", r"\bnumero de (pedido|orden|venta)\b",
     r"\bqueda (agendada|programada) (la )?(instalacion|entrega)\b",
+    r"\b(la )?(instalacion|entrega|activacion|visita de instalacion) (queda|quedo|quedara) (programada|agendada|confirmada)\b",
+    r"\bsu (solicitud|contratacion|compra|afiliacion) (quedo|queda|ha quedado) (registrada|confirmada|aprobada|radicada)\b",
 ])
 PRECIO = compilar([
     r"\$\s?\d", r"\b\d+[.,]?\d* ?(mil|pesos|millones)\b", r"\bvalor (mensual|total|de)\b", r"\bprecio\b",
