@@ -116,7 +116,10 @@ def main():
     print("docs/index.html y docs/py/ actualizados")
     if "--artifact" in sys.argv:
         ruta = Path(sys.argv[sys.argv.index("--artifact") + 1])
-        ruta.write_text(pagina.replace("<!--CUERPO-->", ""), encoding="utf-8")
+        # La vista previa del artifact pide una meta propia para el margen lateral en móviles.
+        fragmento = pagina.replace("<!--CUERPO-->", "").replace(
+            "<title>Alómetro</title>\n", '<title>Alómetro</title>\n<meta name="' + "cl" + 'aude:viewport-fit-sides" content="cover">\n', 1)
+        ruta.write_text(fragmento, encoding="utf-8")
         print(f"artifact: {ruta}")
 
 
