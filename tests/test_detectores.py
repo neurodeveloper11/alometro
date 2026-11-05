@@ -139,3 +139,31 @@ def test_sin_respuesta():
     assert s.sin_respuesta is not None
     s2 = analizar(conv([("bot", "Hola"), ("cliente", "hola"), ("bot", "¿En qué te ayudo?")]))
     assert s2.sin_respuesta is None
+
+
+def test_dictar_dos_veces_la_cedula_no_es_repetir_el_mensaje():
+    """El dato repetido se mide una sola vez (datos_repedidos), no también como «no fue entendido»."""
+    turnos = [
+        ("bot", "Para ayudarte, por favor escribe tu número de cédula."),
+        ("cliente", "728.379.762"),
+        ("bot", "Te voy a comunicar con un asesor."),
+        ("agente", "Buenas tardes. Por favor me regala su número de cédula."),
+        ("cliente", "Ya se la di al bot hace un minuto, otra vez??"),
+        ("agente", "Es necesario para validar la información."),
+        ("cliente", "728.379.762"),
+    ]
+    s = analizar(conv(turnos))
+    assert len(s.datos_repedidos) == 1
+    assert s.repeticiones_cliente == []
+    # Igual con el texto anonimizado.
+    anonimo = [(r, "[CEDULA]" if t == "728.379.762" else t) for r, t in turnos]
+    assert analizar(conv(anonimo)).repeticiones_cliente == []
+
+
+def test_repetir_la_peticion_si_cuenta():
+    s = analizar(conv([
+        ("cliente", "Quiero cancelar el plan de internet"),
+        ("bot", "¿Te interesa conocer nuestras promociones?"),
+        ("cliente", "Quiero cancelar el plan de internet"),
+    ]))
+    assert len(s.repeticiones_cliente) == 1

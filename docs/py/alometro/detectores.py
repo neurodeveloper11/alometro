@@ -166,6 +166,14 @@ def _puntaje_frustracion(texto: str, norm: str) -> float:
     return float(max(0, min(10, p)))
 
 
+_ETIQUETA_ANONIMA = re.compile(r"\[[a-z_]+\]")  # [cedula], [numero]… (texto ya normalizado)
+
+
+def _palabras_de_contenido(texto_norm: str) -> int:
+    """Palabras que no son números (cédulas, celulares) ni etiquetas de anonimización."""
+    return sum(1 for w in palabras(_ETIQUETA_ANONIMA.sub(" ", texto_norm)) if not w.isdigit())
+
+
 def analizar(conv: Conversacion) -> Senales:
     s = Senales()
     turnos = conv.turnos
@@ -181,8 +189,9 @@ def analizar(conv: Conversacion) -> Senales:
     for i in idx_cliente:
         t, n = turnos[i], norms[i]
         f = _puntaje_frustracion(t.texto, n)
-        # Repetir lo mismo es señal de no ser entendido.
-        if len(palabras(n)) >= 3 and any(jaccard(n, norms[j]) >= 0.8 for j in vistos):
+        # Repetir lo mismo es señal de no ser entendido. Dictar de nuevo un dato
+        # («728.379.762») no cuenta aquí: ya se mide como dato repetido.
+        if _palabras_de_contenido(n) >= 3 and any(jaccard(n, norms[j]) >= 0.8 for j in vistos):
             s.repeticiones_cliente.append(_ev(i, "cliente", t.texto))
             f = min(10.0, f + 1)
         vistos.append(i)
