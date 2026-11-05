@@ -81,6 +81,7 @@ FRUSTRACION_LEVE = compilar([  # 1 punto
     r"\bayudeme por favor\b", r"\bnada que\b", r"\bdemasiado\b", r"\bdemorad[oa]\b",
     r"\bespere y espere\b", r"\bmucho tiempo\b", r"\bdisgustad[oa]\b",
 ])
+FRUSTRACION_EMOJI = compilar([r"[\U0001F621\U0001F92C\U0001F620\U0001F47F\U0001F4A2\U0001F44E\U0001F624\U0001F612\U0001F644\U0001F62B\U0001F629]"])  # 😡🤬😠👿💢👎😤😒🙄😫😩
 POSITIVO_CLIENTE = compilar([  # resta 2 puntos
     r"\b(muchas |mil |muy amable,? )?gracias\b", r"\bmuy amable\b", r"\bperfecto\b", r"\bexcelente\b",
     r"\bque bien\b", r"\bsuper\b", r"\bme sirvio\b", r"\bgenial\b", r"\bbuenisimo\b",

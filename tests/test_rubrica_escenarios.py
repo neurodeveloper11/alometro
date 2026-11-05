@@ -84,3 +84,18 @@ def test_criterios_tienen_fundamento():
     for c in CRITERIOS:
         assert c.fundamento and c.recomendacion
         assert (c.peso == 0) == (c.critico is not None)
+
+
+def test_conversacion_vacia_no_se_evalua():
+    from alometro.modelos import Conversacion
+    from alometro.motor import evaluar_lote
+    with pytest.raises(ValueError):
+        evaluar(Conversacion(id="v", turnos=[]))
+    omitidas = []
+    assert evaluar_lote([Conversacion(id="v", turnos=[])], omitidas=omitidas) == [] and omitidas == ["v"]
+
+
+def test_chat_sin_respuesta_es_critico():
+    from alometro.modelos import Conversacion, Turno
+    e = evaluar(Conversacion(id="w", canal="whatsapp", turnos=[Turno("cliente", "Hola, necesito ayuda con mi pedido")]))
+    assert {x["criterio"] for x in e.errores_criticos} == {"R4"} and e.puntaje == 0

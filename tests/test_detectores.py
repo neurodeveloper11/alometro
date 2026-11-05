@@ -127,3 +127,15 @@ def test_aceptacion_debil_no_cuenta():
 def test_temas():
     s = analizar(conv([("cliente", "No tengo internet y además me cobraron doble la factura")]))
     assert {"falla_tecnica", "facturacion", "cobro_no_reconocido"} <= set(s.temas)
+
+
+def test_emojis_de_enojo_cuentan_como_frustracion():
+    s = analizar(conv([("cliente", "otra vez sin servicio 😡😡"), ("agente", "Lo reviso")]))
+    assert s.frustracion[0] >= 4
+
+
+def test_sin_respuesta():
+    s = analizar(conv([("cliente", "hola, ¿alguien me ayuda?"), ("cliente", "??")]))
+    assert s.sin_respuesta is not None
+    s2 = analizar(conv([("bot", "Hola"), ("cliente", "hola"), ("bot", "¿En qué te ayudo?")]))
+    assert s2.sin_respuesta is None

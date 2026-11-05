@@ -32,6 +32,7 @@ class Senales:
     datos_repedidos: list[Evidencia] = field(default_factory=list)
     contexto_reconocido: Evidencia | None = None
     abandono: bool = False
+    sin_respuesta: Evidencia | None = None
     # Emoción
     frustracion: list[float] = field(default_factory=list)
     frustracion_inicial: float = 0.0
@@ -105,6 +106,7 @@ class Senales:
             "carga_emocional_agente": self.carga_emocional,
             "amenaza_externa": bool(self.amenazas_externas),
             "abandono": self.abandono,
+            "sin_respuesta": self.sin_respuesta is not None,
             "queja": self.queja is not None,
             "radicado": self.radicado is not None,
             "plazo": self.plazo is not None,
@@ -147,6 +149,7 @@ def _puntaje_frustracion(texto: str, norm: str) -> float:
         p += 1
     if proporcion_mayusculas(texto) > 0.6:
         p += 2
+    p += min(4, 2 * contar(L.FRUSTRACION_EMOJI, texto))
     if buscar(L.POSITIVO_CLIENTE, norm):
         p -= 2
     return float(max(0, min(10, p)))
@@ -335,6 +338,10 @@ def analizar(conv: Conversacion) -> Senales:
         s.evidencia_resolucion.append(_ev(u, "cliente", turnos[u].texto))
     else:
         s.resolucion = "incierto"
+
+    # Sin respuesta: el cliente escribió y nadie de la empresa contestó después.
+    if idx_cliente and not any(i > idx_cliente[0] for i in idx_empresa):
+        s.sin_respuesta = _ev(idx_cliente[0], "cliente", turnos[idx_cliente[0]].texto)
 
     # Abandono: el cliente se va sin respuesta útil (último turno es suyo y está frustrado o pidiendo humano).
     if turnos and turnos[-1].rol == "cliente":

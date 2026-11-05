@@ -35,3 +35,21 @@ def test_calibracion_kappa(tmp_path):
     assert fila["criterio"] == "R1" and fila["acuerdo"] == 1.0 and fila["kappa"] == 1.0
     ancho = leer_etiquetas("conversacion_id,R1,T4\na,si,si\nb,no,no\n")
     assert ancho[("b", "T4")] is False
+
+
+def test_config_de_operacion(tmp_path):
+    import json
+
+    import pytest
+    d = tmp_path / "demo"
+    main(["demo", "--carpeta", str(d), "-n", "40"])
+    cfg = tmp_path / "cfg.json"
+    cfg.write_text(json.dumps({"metas": {"I16": 10}, "desactivar": ["P8"], "pesos": {"R1": 30}}), encoding="utf-8")
+    assert main(["evaluar", str(d / "antes.jsonl"), "-o", str(tmp_path / "i.html"), "--json", str(tmp_path / "r.json"), "--config", str(cfg)]) == 0
+    r = json.loads((tmp_path / "r.json").read_text(encoding="utf-8"))
+    i16 = next(i for i in r["indicadores"] if i["id"] == "I16")
+    assert i16["meta"] == 10
+    assert all(c["id"] != "P8" for e in r["evaluaciones"] for c in e["criterios"])
+    cfg.write_text(json.dumps({"pesos": {"ZZ9": 3}}), encoding="utf-8")
+    with pytest.raises(SystemExit):
+        main(["evaluar", str(d / "antes.jsonl"), "--config", str(cfg)])

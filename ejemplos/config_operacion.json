@@ -1,0 +1,7 @@
+{
+  "metas": {"I01": 0.75, "I02": 0.12, "I16": 85},
+  "pesos": {"R1": 25, "P7": 1},
+  "desactivar": ["P8"],
+  "anular_por_critico": true,
+  "dias_recontacto": 7
+}

@@ -26,9 +26,29 @@ from .motor import Politica, evaluar_lote
 from .rubrica import CRITERIOS, DIMENSIONES
 from .sintetico import generar
 
+CLAVES_CONFIG = {"pesos", "desactivar", "metas", "anular_por_critico", "dias_recontacto"}
+
+
+def _config(a) -> dict:
+    """Lee el archivo de configuración JSON de la operación (opcional)."""
+    if not getattr(a, "config", None):
+        return {}
+    cfg = json.loads(Path(a.config).read_text(encoding="utf-8"))
+    desconocidas = set(cfg) - CLAVES_CONFIG
+    if desconocidas:
+        raise SystemExit(f"Claves desconocidas en {a.config}: {', '.join(sorted(desconocidas))}. Válidas: {', '.join(sorted(CLAVES_CONFIG))}.")
+    ids = {c.id for c in CRITERIOS}
+    malos = (set(cfg.get("pesos", {})) | set(cfg.get("desactivar", []))) - ids
+    if malos:
+        raise SystemExit(f"Criterios desconocidos en {a.config}: {', '.join(sorted(malos))}.")
+    return cfg
+
 
 def _politica(a) -> Politica:
-    return Politica(anular_por_critico=not a.no_anular, anonimizar_evidencias=not a.sin_anonimizar)
+    cfg = _config(a)
+    anular = cfg.get("anular_por_critico", True) and not a.no_anular
+    return Politica(anular_por_critico=anular, anonimizar_evidencias=not a.sin_anonimizar,
+                    pesos={k: int(v) for k, v in cfg.get("pesos", {}).items()}, desactivar=set(cfg.get("desactivar", [])))
 
 
 def _csv(evs) -> str:
@@ -67,8 +87,16 @@ def cmd_evaluar(a) -> int:
     if not convs:
         print("No se encontraron conversaciones.", file=sys.stderr)
         return 1
-    evs = evaluar_lote(convs, _politica(a))
-    res = calcular(evs, dias_recontacto=a.dias_recontacto)
+    omitidas: list[str] = []
+    evs = evaluar_lote(convs, _politica(a), omitidas)
+    if omitidas:
+        print(f"Aviso: se omitieron {len(omitidas)} conversaciones vacías: {', '.join(omitidas[:10])}"
+              + (" …" if len(omitidas) > 10 else ""), file=sys.stderr)
+    if not evs:
+        print("No hay conversaciones con texto para evaluar.", file=sys.stderr)
+        return 1
+    cfg = _config(a)
+    res = calcular(evs, dias_recontacto=cfg.get("dias_recontacto", a.dias_recontacto), metas=cfg.get("metas"))
     salida_html = a.salida or "informe_alometro.html"
     Path(salida_html).write_text(generar_html(evs, res, fuente=Path(a.entrada).name), encoding="utf-8")
     if a.json:
@@ -155,6 +183,7 @@ def main(argv=None) -> int:
     def comunes(sp):
         sp.add_argument("--no-anular", action="store_true", help="no poner la nota en 0 cuando hay error crítico")
         sp.add_argument("--sin-anonimizar", action="store_true", help="mostrar las evidencias sin anonimizar")
+        sp.add_argument("--config", help="JSON de la operación: pesos, desactivar, metas, anular_por_critico, dias_recontacto")
 
     e = sub.add_parser("evaluar", help="evaluar conversaciones y generar el informe")
     e.add_argument("entrada", help="archivo .jsonl/.json/.csv/.txt o carpeta")
