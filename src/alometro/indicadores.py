@@ -18,6 +18,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
 
 from .calendario import a_hora_colombia
+from .coaching import plan_coaching
 from .estadistica import diferencia_medias, diferencia_proporciones, wilson
 from .modelos import Evaluacion
 
@@ -222,6 +223,7 @@ def calcular(evs: list[Evaluacion], dias_recontacto: int = 7, metas: dict[str, f
         "contencion": contencion,
         "ley_2300_frecuencia": frecuencia_ley_2300(evs),
         "agentes": por_agente(evs),
+        "coaching": plan_coaching(evs),
         "temas": por_tema(evs),
         "por_modalidad": por_modalidad(evs),
         "criterios": por_criterio(evs),

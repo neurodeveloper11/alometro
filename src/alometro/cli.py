@@ -1,7 +1,7 @@
 """Línea de comandos de Alómetro.
 
     alometro demo                     # genera datos sintéticos y un informe de ejemplo
-    alometro evaluar datos.jsonl -o informe.html --json resultados.json --csv resultados.csv
+    alometro evaluar datos.jsonl -o informe.html --json resultados.json --csv resultados.csv --coaching coaching.csv
     alometro comparar antes.jsonl despues.jsonl
     alometro calibrar datos.jsonl etiquetas_humanas.csv
     alometro criterios                # imprime la rúbrica
@@ -19,6 +19,7 @@ from pathlib import Path
 from . import __version__
 from .calibracion import calibrar, leer_etiquetas
 from .cargar import a_jsonl, cargar
+from .coaching import coaching_csv
 from .estadistica import tamano_muestra
 from .indicadores import calcular, comparar
 from .informe import generar_html, resumen_json
@@ -116,8 +117,11 @@ def cmd_evaluar(a) -> int:
         Path(a.json).write_text(resumen_json(evs, res), encoding="utf-8")
     if a.csv:
         Path(a.csv).write_text(_csv(evs), encoding="utf-8")
+    if a.coaching:
+        Path(a.coaching).write_text(coaching_csv(res["coaching"]), encoding="utf-8")
     _imprimir_resumen(res)
-    print(f"\nInforme: {salida_html}" + (f" · JSON: {a.json}" if a.json else "") + (f" · CSV: {a.csv}" if a.csv else ""))
+    print(f"\nInforme: {salida_html}" + (f" · JSON: {a.json}" if a.json else "") + (f" · CSV: {a.csv}" if a.csv else "")
+          + (f" · Coaching: {a.coaching}" if a.coaching else ""))
     if len(evs) < 100:
         print(f"Aviso: con {len(evs)} interacciones los porcentajes son poco precisos; "
               f"para ±5 puntos se necesitan unas {tamano_muestra()} por periodo.")
@@ -204,6 +208,7 @@ def main(argv=None) -> int:
     e.add_argument("-o", "--salida", help="informe HTML (por defecto informe_alometro.html)")
     e.add_argument("--json", help="guardar resultados completos en JSON")
     e.add_argument("--csv", help="guardar una fila por interacción en CSV")
+    e.add_argument("--coaching", help="guardar el plan de coaching por agente en CSV")
     e.add_argument("--dias-recontacto", type=int, default=7)
     comunes(e)
     e.set_defaults(f=cmd_evaluar)
