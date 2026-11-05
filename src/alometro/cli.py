@@ -204,7 +204,7 @@ def main(argv=None) -> int:
         sp.add_argument("--config", help="JSON de la operación: pesos, desactivar, metas, anular_por_critico, dias_recontacto")
 
     e = sub.add_parser("evaluar", help="evaluar conversaciones y generar el informe")
-    e.add_argument("entrada", help="archivo .jsonl/.json/.csv/.txt/.srt/.vtt o carpeta")
+    e.add_argument("entrada", help="archivo .xlsx/.csv/.tsv/.jsonl/.json/.txt/.srt/.vtt o carpeta")
     e.add_argument("-o", "--salida", help="informe HTML (por defecto informe_alometro.html)")
     e.add_argument("--json", help="guardar resultados completos en JSON")
     e.add_argument("--csv", help="guardar una fila por interacción en CSV")

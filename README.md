@@ -2,7 +2,7 @@
 
 **Mide lo que pasa en cada llamada.** Alómetro evalúa conversaciones de call center y de chatbots (voz transcrita, chat, WhatsApp) con criterios objetivos y auditables, pensados para Colombia y Latinoamérica. Revisa si el cliente **resolvió**, cuánto **esfuerzo** le costó, si el bot lo **dejó llegar a una persona**, cómo terminó su **emoción** y si la atención **cumplió la ley**.
 
-* 100 % local: no envía nada a internet ni usa APIs externas. Funciona en un servidor, en un portátil o en el navegador.
+* 100 % local: no envía nada a internet ni usa APIs externas. Funciona en un servidor, en un portátil o en el navegador, donde basta con arrastrar los archivos (Excel, CSV, subtítulos o texto).
 * Sin dependencias: Python 3.10+ y la biblioteca estándar.
 * Auditable: cada hallazgo cita el turno y la frase que lo respalda. Las evidencias se anonimizan.
 * Medible: indicadores de resultado con meta e intervalo de confianza, comparación antes/después con significancia estadística y calibración contra analistas humanos (kappa).
@@ -69,7 +69,20 @@ JSONL (una conversación por línea). Los roles son `cliente`, `agente`, `bot` y
 * `tipo`: `ventas`, `servicio`, `soporte`, `cobranza`, `retencion` o `cancelacion`.
 * `sector`: `telecom`, `financiero`, `salud`, `servicios_publicos`, `comercio`, `seguros` o `general`. Activa reglas como la de la CRC.
 * `inicio`, `cliente_id` y `direccion` habilitan el recontacto a 7 días y las reglas de horario y frecuencia de la Ley 2300.
-* También acepta CSV (una fila por turno) y texto plano (`Agente: …` / `Cliente: …`). Ver `src/alometro/cargar.py` y la carpeta `ejemplos/`.
+* También acepta texto plano (`Agente: …` / `Cliente: …`). Ver `src/alometro/cargar.py` y la carpeta `ejemplos/`.
+
+### Excel y CSV tal como salen del sistema
+
+`alometro evaluar exportacion.xlsx` (o `.csv`, `.tsv`) sin preparar nada:
+
+* **Una fila por mensaje** con id de conversación, quién habla y el mensaje. Se reconocen nombres habituales en español e inglés: «Caso», «Ticket», «Conversation ID» · «Rol», «Hablante», «Speaker» · «Mensaje», «Texto», «Message». Opcionales: fecha (también fechas de Excel), asesor, cliente, canal, tipo, sector, satisfacción.
+* **Una fila por conversación** con una columna «Transcripción» de líneas «Agente: …» / «Cliente: …».
+* CSV con `,`, `;` (Excel en Colombia), tabulador o `|`, en UTF-8 o en la codificación de Windows.
+* Excel se lee con la biblioteca estándar (sin dependencias). Si faltan columnas, el error dice cuáles encontró y cuáles espera.
+
+### En la web, sin instalar nada
+
+En la [página del proyecto](https://neurodeveloper11.github.io/alometro/#probar) se suben o arrastran los archivos (varios a la vez) y se obtiene el informe completo, descargable. El motor corre dentro del navegador (Python en WebAssembly): los archivos no se suben a ningún servidor.
 
 ### Grabaciones transcritas (voz a texto)
 

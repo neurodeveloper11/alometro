@@ -96,22 +96,180 @@ def desde_json(texto: str, roles: dict[str, str] | None = None) -> list[Conversa
     return [desde_dict(d, roles) for d in data]
 
 
-def desde_csv(texto: str, roles: dict[str, str] | None = None) -> list[Conversacion]:
-    filas = list(csv.DictReader(io.StringIO(texto)))
+# Nombres de columna habituales en exportaciones de CRM, centrales telefónicas y plataformas de chat.
+_ALIAS_COLUMNAS = {
+    "conversacion_id": ("conversacion_id", "id", "conversation_id", "conversation", "conversacion", "id_conversacion", "caso", "id_caso",
+                        "ticket", "ticket_id", "chat_id", "call_id", "llamada", "id_llamada", "session_id", "sesion", "interaccion",
+                        "id_interaccion", "interaction_id"),
+    "rol": ("rol", "role", "speaker", "hablante", "emisor", "autor", "author", "from", "sender", "participante", "participant",
+            "quien", "tipo_emisor", "remitente"),
+    "texto": ("texto", "text", "message", "mensaje", "contenido", "content", "body", "utterance", "frase", "comentario"),
+    "transcripcion": ("transcripcion", "transcript", "transcription", "conversacion_completa", "dialogo", "chat_completo"),
+    "t": ("t", "segundo", "segundos", "offset", "start", "inicio_turno", "seconds"),
+    "inicio": ("inicio", "fecha", "fecha_hora", "date", "datetime", "hora_inicio", "start_time", "created_at", "fecha_inicio", "timestamp"),
+    "agente_id": ("agente_id", "agente", "agent", "agent_id", "asesor", "asesor_id", "id_asesor", "operador"),
+    "cliente_id": ("cliente_id", "customer_id", "client_id", "id_cliente", "customer", "cliente"),
+    "canal": ("canal", "channel"),
+    "tipo": ("tipo", "type", "tipo_interaccion", "motivo_contacto", "campana", "campaign"),
+    "sector": ("sector", "industria", "industry"),
+    "direccion": ("direccion", "direction", "sentido"),
+    "csat": ("csat", "satisfaccion", "satisfaction", "calificacion", "rating"),
+}
+_COLUMNA_CANONICA = {alias: canon for canon, aliases in _ALIAS_COLUMNAS.items() for alias in aliases}
+
+
+def _clave_columna(nombre: str) -> str:
+    from .texto import normalizar
+    return re.sub(r"[^a-z0-9]+", "_", normalizar(nombre or "")).strip("_")
+
+
+def _canonizar(filas: list[dict]) -> tuple[list[dict], dict[str, str]]:
+    """Renombra columnas a sus nombres canónicos. Devuelve (filas, {original: canónica})."""
+    if not filas:
+        return [], {}
+    mapa: dict[str, str] = {}
+    for col in filas[0]:
+        canon = _COLUMNA_CANONICA.get(_clave_columna(col))
+        if canon and canon not in mapa.values():
+            mapa[col] = canon
+    return [{mapa.get(k, k): v for k, v in f.items()} for f in filas], mapa
+
+
+def _num_o_none(v: Any) -> float | None:
+    try:
+        return _float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _fecha_flexible(v: Any) -> datetime | None:
+    if v in (None, ""):
+        return None
+    n = _num_o_none(v)
+    if n is not None and 20000 < n < 80000:  # fecha serial de Excel
+        from datetime import timedelta
+        return datetime(1899, 12, 30) + timedelta(days=n)
+    try:
+        return _fecha(v)
+    except ValueError:
+        return None
+
+
+def desde_filas(filas: list[dict], roles: dict[str, str] | None = None, origen: str = "tabla") -> list[Conversacion]:
+    """Filas de una tabla (CSV o Excel). Acepta dos formas:
+
+    * una fila por turno: columnas de conversación + rol + texto;
+    * una fila por conversación: columna con la transcripción completa («Agente: …» por línea).
+    """
+    filas = [{k: (v.strip() if isinstance(v, str) else v) for k, v in f.items() if k is not None} for f in filas]
+    filas = [f for f in filas if any(v not in (None, "") for v in f.values())]
+    if not filas:
+        return []
+    filas, mapa = _canonizar(filas)
+    cols = set(filas[0])
+    meta_cols = (*_CAMPOS_CONV, "csat")
+    if "transcripcion" in cols or ("texto" in cols and "rol" not in cols):
+        col = "transcripcion" if "transcripcion" in cols else "texto"
+        convs = []
+        for i, f in enumerate(filas, 1):
+            cid = str(f.get("conversacion_id") or f"{origen}-{i}")
+            c = desde_txt(str(f.get(col) or ""), id_=cid, roles=roles)
+            for k in meta_cols:
+                if f.get(k) not in (None, ""):
+                    setattr(c, k, _float(f[k]) if k == "csat" else str(f[k]).strip().lower() if k in ("tipo", "canal", "sector", "direccion") else str(f[k]))
+            c.inicio = _fecha_flexible(f.get("inicio")) or c.inicio
+            c.__post_init__()
+            convs.append(c)
+        return convs
+    faltan = [c for c in ("conversacion_id", "rol", "texto") if c not in cols]
+    if faltan:
+        raise ValueError(
+            f"{origen}: faltan columnas {faltan}. Columnas encontradas: {sorted(cols)}. Use una fila por turno con "
+            "conversacion_id, rol y texto (también se aceptan id/speaker/message…), o una fila por conversación con una "
+            "columna «transcripcion» de líneas «Agente: …» / «Cliente: …».")
     grupos: dict[str, list[dict]] = {}
     for f in filas:
-        cid = f.get("conversacion_id") or f.get("id")
+        cid = str(f.get("conversacion_id") or "").strip()
         if not cid:
-            raise ValueError("El CSV necesita la columna 'conversacion_id'.")
+            continue
         grupos.setdefault(cid, []).append(f)
     convs = []
     for cid, fs in grupos.items():
         p = fs[0]
-        d = {k: p.get(k) for k in (*_CAMPOS_CONV, "inicio", "csat") if p.get(k)}
+        d: dict[str, Any] = {k: p.get(k) for k in meta_cols if p.get(k) not in (None, "")}
+        for k in ("tipo", "canal", "sector", "direccion"):
+            if k in d:
+                d[k] = str(d[k]).strip().lower()
         d["id"] = cid
-        d["turnos"] = [{"rol": f["rol"], "texto": f.get("texto", ""), "t": f.get("t")} for f in fs]
-        convs.append(desde_dict(d, roles))
+        inicio = _fecha_flexible(p.get("inicio"))
+        d["turnos"] = [{"rol": str(f.get("rol") or ""), "texto": str(f.get("texto") or ""), "t": _num_o_none(f.get("t"))} for f in fs]
+        c = desde_dict(d, roles)
+        c.inicio = inicio
+        convs.append(c)
     return convs
+
+
+def desde_csv(texto: str, roles: dict[str, str] | None = None, origen: str = "csv") -> list[Conversacion]:
+    muestra = texto[:4096]
+    try:
+        dialecto = csv.Sniffer().sniff(muestra.splitlines()[0] if muestra else ",", delimiters=",;\t|")
+    except csv.Error:
+        dialecto = csv.excel
+    return desde_filas(list(csv.DictReader(io.StringIO(texto), dialect=dialecto)), roles, origen)
+
+
+def leer_xlsx(datos: bytes) -> list[dict]:
+    """Primera hoja de un .xlsx como lista de dicts (biblioteca estándar: zip + XML)."""
+    import zipfile
+    from xml.etree import ElementTree as ET
+    ns = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+          "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships"}
+    try:
+        z = zipfile.ZipFile(io.BytesIO(datos))
+    except zipfile.BadZipFile as ex:
+        raise ValueError("El archivo no es un Excel .xlsx válido (¿es un .xls antiguo? Guárdelo como .xlsx o .csv).") from ex
+    compartidas: list[str] = []
+    if "xl/sharedStrings.xml" in z.namelist():
+        for si in ET.fromstring(z.read("xl/sharedStrings.xml")).findall("m:si", ns):
+            compartidas.append("".join(t.text or "" for t in si.iter(f"{{{ns['m']}}}t")))
+    libro = ET.fromstring(z.read("xl/workbook.xml"))
+    hoja = libro.find("m:sheets/m:sheet", ns)
+    rid = hoja.get(f"{{{ns['r']}}}id") if hoja is not None else None
+    ruta = "xl/worksheets/sheet1.xml"
+    if rid and "xl/_rels/workbook.xml.rels" in z.namelist():
+        for rel in ET.fromstring(z.read("xl/_rels/workbook.xml.rels")):
+            if rel.get("Id") == rid:
+                destino = rel.get("Target", "").lstrip("/")
+                ruta = destino if destino.startswith("xl/") else "xl/" + destino
+    filas: list[list[str]] = []
+    for row in ET.fromstring(z.read(ruta)).iter(f"{{{ns['m']}}}row"):
+        celdas: dict[int, str] = {}
+        for c in row.findall("m:c", ns):
+            ref = re.match(r"([A-Z]+)", c.get("r", "A"))
+            col = 0
+            for letra in ref.group(1) if ref else "A":
+                col = col * 26 + (ord(letra) - 64)
+            tipo, v = c.get("t"), c.find("m:v", ns)
+            if tipo == "s" and v is not None:
+                valor = compartidas[int(v.text)]
+            elif tipo == "inlineStr":
+                valor = "".join(t.text or "" for t in c.iter(f"{{{ns['m']}}}t"))
+            else:
+                valor = v.text if v is not None and v.text is not None else ""
+            celdas[col - 1] = valor
+        if celdas:
+            fila = [""] * (max(celdas) + 1)
+            for i, val in celdas.items():
+                fila[i] = val
+            filas.append(fila)
+    if not filas:
+        return []
+    cab = [h.strip() or f"columna_{i + 1}" for i, h in enumerate(filas[0])]
+    return [dict(zip(cab, f + [""] * (len(cab) - len(f)))) for f in filas[1:]]
+
+
+def desde_xlsx(datos: bytes, roles: dict[str, str] | None = None, origen: str = "xlsx") -> list[Conversacion]:
+    return desde_filas(leer_xlsx(datos), roles, origen)
 
 
 _LINEA = re.compile(r"^\s*\[?(?P<t>\d{1,2}:\d{2}(:\d{2})?(\.\d+)?)?\]?\s*\[?(?P<rol>[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ _\-]{1,24}?)\]?\s*:\s*(?P<texto>.+)$")
@@ -181,7 +339,7 @@ def desde_subtitulos(texto: str, id_: str = "sub-1", roles: dict[str, str] | Non
     return desde_dict({"id": id_, "turnos": turnos}, roles)
 
 
-FORMATOS = {".json", ".jsonl", ".csv", ".txt", ".srt", ".vtt"}
+FORMATOS = {".json", ".jsonl", ".csv", ".tsv", ".xlsx", ".txt", ".srt", ".vtt"}
 
 
 def cargar(ruta: str | Path, roles: dict[str, str] | None = None) -> list[Conversacion]:
@@ -192,19 +350,25 @@ def cargar(ruta: str | Path, roles: dict[str, str] | None = None) -> list[Conver
             if f.suffix.lower() in FORMATOS:
                 convs.extend(cargar(f, roles))
         return convs
-    texto = ruta.read_text(encoding="utf-8-sig")
     suf = ruta.suffix.lower()
+    if suf == ".xlsx":
+        return desde_xlsx(ruta.read_bytes(), roles, origen=ruta.name)
+    datos = ruta.read_bytes()
+    try:
+        texto = datos.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        texto = datos.decode("cp1252")  # CSV exportados desde Excel en Windows
     if suf == ".jsonl":
         return desde_jsonl(texto, roles)
     if suf == ".json":
         return desde_json(texto, roles)
-    if suf == ".csv":
-        return desde_csv(texto, roles)
+    if suf in (".csv", ".tsv"):
+        return desde_csv(texto, roles, origen=ruta.name)
     if suf == ".txt":
         return [desde_txt(texto, id_=ruta.stem, roles=roles)]
     if suf in (".srt", ".vtt"):
         return [desde_subtitulos(texto, id_=ruta.stem, roles=roles)]
-    raise ValueError(f"Formato no soportado: {suf}")
+    raise ValueError(f"Formato no soportado: {suf}. Use uno de: {', '.join(sorted(FORMATOS))}.")
 
 
 def a_jsonl(convs: Iterable[Conversacion]) -> str:

@@ -144,6 +144,16 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .vivo{margin-top:24px;padding:20px;display:grid;gap:12px}
 .vivo textarea{width:100%;min-height:180px;font:400 .9rem/1.5 var(--f-mono);padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);resize:vertical}
 .vivo .fila{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.zona{border:2px dashed var(--line);border-radius:var(--r);padding:28px 20px;display:grid;gap:8px;justify-items:center;text-align:center;background:var(--paper);cursor:pointer;transition:border-color .15s,background .15s}
+.zona:hover,.zona.encima{border-color:var(--signal);background:var(--signal-wash)}
+.zona b{font:700 1.05rem/1.3 var(--f-display)}
+.zona input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.zona.inactiva{cursor:not-allowed;opacity:.6}
+.formatos{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.lista-archivos{margin:0;padding-left:1.1em;color:var(--ink-2);font-size:.92rem}
+.informe-marco{width:100%;height:80vh;min-height:520px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.separador{display:flex;align-items:center;gap:12px;color:var(--ink-3);font-size:.85rem}
+.separador::before,.separador::after{content:"";flex:1;height:1px;background:var(--line)}
 .estado{font-size:.9rem;color:var(--ink-2)}
 
 /* Criterios */
@@ -265,7 +275,7 @@ footer .envoltura{display:grid;gap:8px}
         <p>Sin modelos opacos ni APIs externas: cada conclusión apunta al turno y a la frase que la respalda, para que un analista de calidad pueda auditarla en segundos.</p>
       </div>
       <div class="pasos">
-        <div class="paso"><h3>Transcripciones</h3><p>Chats, WhatsApp o llamadas transcritas (.srt, .vtt, .txt, JSONL, CSV). Si el motor de voz entrega hablantes anónimos (SPEAKER_00), Alómetro infiere quién es el agente.</p></div>
+        <div class="paso"><h3>Transcripciones</h3><p>Se suben los archivos tal como salen del sistema: Excel o CSV del CRM, subtítulos .srt/.vtt del motor de voz, .txt o JSON. Reconoce los nombres de columna habituales e infiere quién es el agente si los hablantes son anónimos.</p></div>
         <div class="paso"><h3>Anonimización</h3><p>Cédulas, teléfonos, correos, tarjetas y direcciones se ocultan en las evidencias. Los radicados se conservan.</p></div>
         <div class="paso"><h3>Señales con evidencia</h3><p>Petición de humano, bucles, datos repetidos, frustración por turno, resolución, radicados, ofertas, amenazas. Entiende negaciones: «no necesito un asesor» no es una petición.</p></div>
         <div class="paso"><h3>Rúbrica</h3><p id="paso-rubrica">Criterios en seis dimensiones y errores críticos que anulan la nota.</p></div>
@@ -297,8 +307,18 @@ footer .envoltura{display:grid;gap:8px}
         </div>
       </div>
       <div class="tarjeta vivo" id="vivo">
-        <h3>Evalúa tu propia conversación</h3>
+        <h3>Evalúa tus propias conversaciones</h3>
         <p class="estado" id="vivo-intro"></p>
+        <label class="zona" id="zona" for="archivos">
+          <input type="file" id="archivos" multiple accept=".xlsx,.csv,.tsv,.txt,.srt,.vtt,.json,.jsonl">
+          <b>Sube o arrastra tus archivos</b>
+          <span class="estado">Exportaciones del CRM o de la plataforma de chat, transcripciones de llamadas o subtítulos del motor de voz a texto. Puedes subir varios a la vez.</span>
+          <span class="formatos"><span class="chip">Excel .xlsx</span><span class="chip">CSV</span><span class="chip">.txt</span><span class="chip">.srt / .vtt</span><span class="chip">JSON / JSONL</span></span>
+        </label>
+        <details class="estado"><summary style="cursor:pointer">¿Qué columnas necesita mi Excel o CSV?</summary>
+          <p style="margin-top:8px">Una fila por mensaje con <b>id de la conversación</b>, <b>quién habla</b> y <b>el mensaje</b>. Se reconocen nombres comunes en español e inglés: «Caso», «Ticket», «Conversation ID»; «Rol», «Hablante», «Speaker»; «Mensaje», «Texto», «Message». También sirve una fila por conversación con una columna «Transcripción» de líneas «Agente: …» / «Cliente: …». Columnas opcionales: fecha, asesor, cliente, canal, tipo, sector y satisfacción. Los hablantes sin nombre (SPEAKER_00) se identifican solos.</p></details>
+        <ul class="lista-archivos" id="archivos-lista"></ul>
+        <div class="separador">o pega una conversación</div>
         <label for="vivo-texto" class="etiqueta">Transcripción (una línea por turno: «Rol: texto»)</label>
         <textarea id="vivo-texto" spellcheck="false"># tipo: servicio | canal: chat | sector: financiero
 Bot: Hola, soy el asistente virtual. ¿En qué te ayudo?
@@ -308,7 +328,11 @@ Cliente: 1020304050
 Bot: Te comunico con un asesor
 Agente: Buenas tardes, me regala su número de cédula por favor
 Cliente: otra vez?? ya se la di al bot</textarea>
-        <div class="fila"><button class="boton primario" id="vivo-boton" type="button">Evaluar con el motor</button><span class="estado" id="vivo-estado" role="status"></span></div>
+        <div class="fila"><button class="boton primario" id="vivo-boton" type="button">Evaluar el texto</button><span class="estado" id="vivo-estado" role="status"></span></div>
+        <div id="vivo-informe" hidden style="display:grid;gap:12px">
+          <div class="fila"><h3 id="vivo-informe-titulo" style="margin-right:auto"></h3><button class="boton secundario" id="vivo-descargar" type="button">Descargar informe (.html)</button></div>
+          <iframe class="informe-marco" id="vivo-marco" title="Informe de Alómetro de tus archivos"></iframe>
+        </div>
       </div>
     </div>
   </section>
@@ -364,13 +388,14 @@ Cliente: otra vez?? ya se la di al bot</textarea>
 
 alometro demo
 alometro evaluar llamadas.jsonl -o informe.html --csv notas.csv --coaching coaching.csv
+alometro evaluar exportacion_crm.xlsx
 alometro evaluar grabaciones/          # .srt / .vtt con SPEAKER_00, SPEAKER_01…
 alometro comparar septiembre.jsonl octubre.jsonl
 alometro calibrar llamadas.jsonl etiquetas_analistas.csv</code></pre>
         <ul class="garantias">
           <li><b>100 % local.</b> No envía transcripciones a internet ni usa APIs de terceros. Corre en un portátil, en un servidor de la empresa o en el navegador.</li>
           <li><b>Sin dependencias.</b> Python 3.10 o superior y nada más.</li>
-          <li><b>Lee grabaciones transcritas.</b> Subtítulos .srt y .vtt de Whisper, AWS, Google o Azure, con inferencia del rol de cada hablante.</li>
+          <li><b>Lee los archivos de la empresa.</b> Excel y CSV de exportaciones (con «;» y acentos de Windows), subtítulos .srt y .vtt de Whisper, AWS, Google o Azure, texto y JSON.</li>
           <li><b>Auditable.</b> Cada hallazgo cita turno y frase; las evidencias se anonimizan.</li>
           <li><b>Hecho para Colombia.</b> Festivos de la Ley Emiliani, Ley 2300, Estatuto del Consumidor, Habeas Data y reglas de la CRC.</li>
           <li><b>Aviso.</b> Es una ayuda para los equipos de calidad: no reemplaza la revisión humana ni la asesoría jurídica.</li>
@@ -563,6 +588,36 @@ def _evaluar(texto):
         "criticos": [{"id": x["criterio"], "nombre": x["nombre"], "categoria": x["categoria"], "detalle": x["detalle"]} for x in e.errores_criticos],
         "anotaciones": anot, "dimensiones": e.dimensiones, "recomendaciones": e.recomendaciones,
         "senales": {k: s[k] for k in ("resolucion", "trayectoria_emocional", "esfuerzo")}}, ensure_ascii=False)
+
+def _evaluar_archivos(rutas):
+    from pathlib import Path
+    from alometro.cargar import cargar
+    from alometro.motor import evaluar_lote
+    from alometro.indicadores import calcular
+    from alometro.informe import generar_html
+    convs, errores, por_archivo = [], [], []
+    nombre = lambda r: Path(r).name.split("_", 1)[1] if "_" in Path(r).name else Path(r).name  # sin el prefijo interno
+    for r in rutas:
+        try:
+            cs = cargar(r)
+            convs.extend(cs)
+            por_archivo.append({"archivo": nombre(r), "conversaciones": len(cs)})
+        except Exception as ex:
+            errores.append({"archivo": nombre(r), "error": str(ex)})
+    omitidas = []
+    evs = evaluar_lote(convs, omitidas=omitidas)
+    dudosas = [c.id for c in convs if (c.metadatos.get("roles_inferidos") or {}).get("_confianza") == "baja"]
+    res = {"n": len(evs), "errores": errores, "por_archivo": por_archivo, "omitidas": omitidas, "roles_dudosos": dudosas, "html": ""}
+    if evs:
+        nombres = ", ".join(nombre(r) for r in rutas)
+        res["html"] = generar_html(evs, calcular(evs), titulo="Informe Alómetro", fuente=nombres)
+        res["puntaje_promedio"] = round(sum(e.puntaje for e in evs) / len(evs), 1)
+        res["con_critico"] = sum(1 for e in evs if e.errores_criticos)
+    if len(convs) == 1 and evs:
+        nl = chr(10)
+        txt = nl.join(f"{t.rol}: {t.texto}" for t in convs[0].turnos)
+        res["una"] = json.loads(_evaluar(f"# tipo: {convs[0].tipo} | canal: {convs[0].canal} | sector: {convs[0].sector}" + nl + txt))
+    return json.dumps(res, ensure_ascii=False)
 `;
 let py = null;
 async function cargarMotor() {
@@ -587,14 +642,65 @@ async function cargarMotor() {
   return p;
 }
 
+let urlInforme = null;
+async function evaluarArchivos(lista) {
+  const archivos = [...lista].filter((f) => /\.(xlsx|csv|tsv|txt|srt|vtt|json|jsonl)$/i.test(f.name));
+  const ignorados = [...lista].length - archivos.length;
+  if (!archivos.length) { $("#vivo-estado").textContent = "Ningún archivo tiene un formato compatible (.xlsx, .csv, .txt, .srt, .vtt, .json, .jsonl)."; return; }
+  const MB = archivos.reduce((a, f) => a + f.size, 0) / 1e6;
+  $("#archivos-lista").innerHTML = archivos.map((f) => `<li>${esc(f.name)} · ${(f.size / 1024).toFixed(0)} KB</li>`).join("") +
+    (ignorados ? `<li>${ignorados} archivo(s) ignorado(s) por formato no compatible</li>` : "");
+  try {
+    const p = await cargarMotor();
+    $("#vivo-estado").textContent = `Evaluando ${archivos.length} archivo(s), ${MB.toFixed(1)} MB…`;
+    p.FS.mkdirTree("/home/pyodide/subidos");
+    const rutas = [];
+    for (const [i, f] of archivos.entries()) {
+      const ruta = `/home/pyodide/subidos/${i}_${f.name.replace(/[^\w.\-]+/g, "_")}`;
+      p.FS.writeFile(ruta, new Uint8Array(await f.arrayBuffer()));
+      rutas.push(ruta);
+    }
+    p.globals.set("RUTAS", p.toPy(rutas));
+    const r = JSON.parse(p.runPython("_evaluar_archivos(RUTAS)"));
+    for (const ruta of rutas) { try { p.FS.unlink(ruta); } catch (e) { /* ya no existe */ } }
+    const avisos = [];
+    if (r.errores.length) avisos.push(...r.errores.map((e) => `${e.archivo}: ${e.error}`));
+    if (r.omitidas.length) avisos.push(`${r.omitidas.length} conversación(es) vacía(s) omitida(s)`);
+    if (r.roles_dudosos.length) avisos.push(`Roles inferidos con confianza baja en: ${r.roles_dudosos.slice(0, 5).join(", ")}`);
+    $("#archivos-lista").innerHTML = r.por_archivo.map((a) => `<li>${esc(a.archivo)}: ${a.conversaciones} conversación(es)</li>`).join("") +
+      avisos.map((a) => `<li style="color:var(--bad)">${esc(a)}</li>`).join("");
+    if (!r.n) { $("#vivo-estado").textContent = "No se pudo evaluar ninguna conversación. Revisa los avisos de arriba."; return; }
+    if (r.una) { document.querySelectorAll("#selector button").forEach((b) => b.setAttribute("aria-pressed", "false")); mostrarEvaluacion(r.una); }
+    if (urlInforme) URL.revokeObjectURL(urlInforme);
+    urlInforme = URL.createObjectURL(new Blob([r.html], {type: "text/html"}));
+    $("#vivo-marco").srcdoc = r.html;
+    $("#vivo-informe-titulo").textContent = `${r.n} conversación(es) · puntaje promedio ${String(r.puntaje_promedio).replace(".", ",")} · ${r.con_critico} con error crítico`;
+    $("#vivo-informe").hidden = false;
+    $("#vivo-estado").textContent = "Listo. El informe completo está abajo; nada salió de tu navegador.";
+    $("#vivo-informe").scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start"});
+  } catch (e) {
+    $("#vivo-estado").textContent = "No se pudieron evaluar los archivos: " + (e.message || e);
+  }
+}
+
 function prepararVivo() {
-  const boton = $("#vivo-boton");
+  const boton = $("#vivo-boton"), zona = $("#zona"), entrada = $("#archivos");
   if (!window.ALOMETRO_VIVO) {
-    $("#vivo-intro").textContent = "En esta vista previa el motor no puede ejecutarse. Instala el paquete (sección Uso) y ejecuta «alometro evaluar» sobre tu archivo, o abre la página publicada en GitHub Pages, donde el motor corre dentro de tu navegador.";
+    $("#vivo-intro").textContent = "En esta vista previa el motor no puede ejecutarse. Instala el paquete (sección Uso) y ejecuta «alometro evaluar» sobre tus archivos, o abre la página publicada en GitHub Pages, donde el motor corre dentro de tu navegador.";
     boton.disabled = true; boton.style.opacity = .5; boton.style.cursor = "not-allowed";
+    zona.classList.add("inactiva"); entrada.disabled = true;
     return;
   }
-  $("#vivo-intro").textContent = "El motor real de Alómetro (Python) corre dentro de tu navegador: el texto no sale de tu equipo. Escribe o pega la conversación; la primera línea puede indicar tipo, canal y sector.";
+  $("#vivo-intro").textContent = "El motor real de Alómetro (Python) corre dentro de tu navegador: tus archivos no se suben a ningún servidor ni salen de tu equipo.";
+  entrada.addEventListener("change", () => { if (entrada.files.length) evaluarArchivos(entrada.files); entrada.value = ""; });
+  ["dragenter", "dragover"].forEach((t) => zona.addEventListener(t, (ev) => { ev.preventDefault(); zona.classList.add("encima"); }));
+  ["dragleave", "drop"].forEach((t) => zona.addEventListener(t, (ev) => { ev.preventDefault(); zona.classList.remove("encima"); }));
+  zona.addEventListener("drop", (ev) => { if (ev.dataTransfer.files.length) evaluarArchivos(ev.dataTransfer.files); });
+  $("#vivo-descargar").addEventListener("click", () => {
+    if (!urlInforme) return;
+    const a = document.createElement("a");
+    a.href = urlInforme; a.download = "informe_alometro.html"; document.body.appendChild(a); a.click(); a.remove();
+  });
   boton.addEventListener("click", async () => {
     boton.disabled = true;
     try {
