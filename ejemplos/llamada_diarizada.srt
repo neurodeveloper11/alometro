@@ -1,0 +1,23 @@
+1
+00:00:00,000 --> 00:00:04,200
+SPEAKER_01: Buenas tardes, le habla Andrés de Aguas y Luz del Valle, ¿en qué le puedo ayudar?
+
+2
+00:00:04,500 --> 00:00:09,800
+SPEAKER_00: Hola, me llegó la factura por el triple y vivo sola, quiero poner un reclamo.
+
+3
+00:00:10,000 --> 00:00:13,000
+SPEAKER_01: Comprendo su molestia. Para su seguridad, ¿me confirma su número de cédula?
+
+4
+00:00:13,200 --> 00:00:15,000
+SPEAKER_00: 31.555.222
+
+5
+00:00:15,500 --> 00:00:24,000
+SPEAKER_01: Gracias. Le radiqué el reclamo con el número 2026-44120 y tiene respuesta en 15 días hábiles. ¿Algo más en lo que le pueda ayudar?
+
+6
+00:00:24,300 --> 00:00:26,000
+SPEAKER_00: No, muchas gracias.

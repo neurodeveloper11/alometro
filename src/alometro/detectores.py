@@ -13,7 +13,18 @@ from dataclasses import dataclass, field
 from . import lexicos as L
 from .calendario import ventana_ley_2300
 from .modelos import Conversacion, Evidencia
-from .texto import buscar, buscar_afirmado, contar, contar_afirmado, jaccard, luhn_valido, normalizar, palabras, proporcion_mayusculas, recortar
+from .texto import (
+    buscar,
+    buscar_afirmado,
+    contar,
+    contar_afirmado,
+    jaccard,
+    luhn_valido,
+    normalizar,
+    palabras,
+    proporcion_mayusculas,
+    recortar,
+)
 
 EMPRESA = ("agente", "bot", "sistema")
 
