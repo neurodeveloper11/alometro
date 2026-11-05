@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from . import lexicos as L
 from .calendario import ventana_ley_2300
 from .modelos import Conversacion, Evidencia
-from .texto import buscar, contar, jaccard, luhn_valido, normalizar, palabras, proporcion_mayusculas, recortar
+from .texto import buscar, buscar_afirmado, contar, contar_afirmado, jaccard, luhn_valido, normalizar, palabras, proporcion_mayusculas, recortar
 
 EMPRESA = ("agente", "bot", "sistema")
 
@@ -139,8 +139,8 @@ _DATO_DADO = {
 
 
 def _puntaje_frustracion(texto: str, norm: str) -> float:
-    p = 3 * contar(L.FRUSTRACION_FUERTE, norm) + 2 * contar(L.FRUSTRACION_MEDIA, norm) + contar(L.FRUSTRACION_LEVE, norm)
-    if buscar(L.AMENAZA_EXTERNA, norm):
+    p = 3 * contar_afirmado(L.FRUSTRACION_FUERTE, norm) + 2 * contar_afirmado(L.FRUSTRACION_MEDIA, norm) + contar_afirmado(L.FRUSTRACION_LEVE, norm)
+    if buscar_afirmado(L.AMENAZA_EXTERNA, norm):
         p += 3
     p += 3 * min(2, contar(L.INSULTOS, norm))
     if "!!" in texto or "¡¡" in texto:
@@ -176,13 +176,13 @@ def analizar(conv: Conversacion) -> Senales:
             f = min(10.0, f + 1)
         vistos.append(i)
         s.frustracion.append(f)
-        frag = buscar(L.AMENAZA_EXTERNA, n)
+        frag = buscar_afirmado(L.AMENAZA_EXTERNA, n)
         if frag:
             s.amenazas_externas.append(_ev(i, "cliente", t.texto, frag))
         frag = buscar(L.INSULTOS, n)
         if frag:
             s.insultos_cliente.append(_ev(i, "cliente", t.texto, frag))
-        frag = buscar(L.QUEJA_CLIENTE, n)
+        frag = buscar_afirmado(L.QUEJA_CLIENTE, n)
         if frag and s.queja is None:
             s.queja = _ev(i, "cliente", t.texto, frag)
         frag = buscar(L.RECHAZO_CLIENTE, n)
@@ -212,7 +212,7 @@ def analizar(conv: Conversacion) -> Senales:
 
     # ---------------- Petición de humano y bot ----------------
     for i in idx_cliente:
-        frag = buscar(L.PETICION_HUMANO, norms[i])
+        frag = buscar_afirmado(L.PETICION_HUMANO, norms[i])
         if not frag:
             continue
         previos = [j for j in idx_empresa if j < i]
@@ -415,7 +415,7 @@ def analizar(conv: Conversacion) -> Senales:
                     setattr(s, nombre, _ev(i, t.rol, t.texto, frag))
         if s.aceptacion is None and buscar(L.PREGUNTA_ACEPTACION, n):
             sig = next((c for c in idx_cliente if c > i), None)
-            if (sig is not None and buscar(L.ACEPTACION_CLIENTE, norms[sig]) and not buscar(L.RECHAZO_CLIENTE, norms[sig])
+            if (sig is not None and buscar_afirmado(L.ACEPTACION_CLIENTE, norms[sig]) and not buscar(L.RECHAZO_CLIENTE, norms[sig])
                     and not buscar(L.ACEPTACION_DEBIL, norms[sig])):
                 s.aceptacion = _ev(sig, "cliente", turnos[sig].texto)
     if len(s.rechazos_cliente) >= 2:
@@ -430,7 +430,7 @@ def analizar(conv: Conversacion) -> Senales:
     if conv.tipo == "cancelacion":
         rad = s.radicado.turno - 1 if s.radicado else None
         for i in idx_empresa:
-            frag = buscar(L.OFERTA, norms[i])
+            frag = buscar_afirmado(L.OFERTA, norms[i])
             if frag:
                 ev = _ev(i, turnos[i].rol, turnos[i].texto, frag)
                 s.ofertas_en_cancelacion.append(ev)
@@ -440,7 +440,7 @@ def analizar(conv: Conversacion) -> Senales:
     # ---------------- Cobranza y seguridad ----------------
     for i in idx_empresa:
         n, t = norms[i], turnos[i]
-        frag = buscar(L.COERCION_COBRANZA, n)
+        frag = buscar_afirmado(L.COERCION_COBRANZA, n)
         if frag:
             s.coercion.append(_ev(i, t.rol, t.texto, frag))
         frag = buscar(L.PIDE_CREDENCIAL, n)

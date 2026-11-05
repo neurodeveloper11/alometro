@@ -28,7 +28,15 @@
     "casos": 22,
     "senales": 30,
     "exactitud": 0.87,
-    "momento": "escrito tras ajustar con v3; medido antes de cualquier ajuste (cifra vigente)",
+    "momento": "escrito tras ajustar con v3; medido antes de cualquier ajuste",
+    "ciego": true
+  },
+  {
+    "conjunto": "v5 ciego",
+    "casos": 16,
+    "senales": 20,
+    "exactitud": 0.75,
+    "momento": "escrito antes de la mejora de negaciones; los 5 errores eran negaciones (cifra vigente)",
     "ciego": true
   }
 ]

@@ -28,3 +28,17 @@ def test_conserva_radicados():
     c = anonimizar(conv([("agente", "Su radicado es 43-1234567890 y su cédula 1.023.456.789")]))
     assert "43-1234567890" in c.turnos[0].texto
     assert "1.023.456.789" not in c.turnos[0].texto
+
+
+def test_negaciones():
+    from alometro import lexicos as L
+    from alometro.texto import buscar_afirmado, normalizar
+    no = lambda t, pats: buscar_afirmado(pats, normalizar(t)) is None  # noqa: E731
+    assert no("no necesito un asesor, solo mi saldo", L.PETICION_HUMANO)
+    assert no("no voy a poner ninguna queja en la superintendencia", L.AMENAZA_EXTERNA)
+    assert no("no estoy molesta", L.FRUSTRACION_LEVE)
+    assert no("no, no acepto", L.ACEPTACION_CLIENTE)
+    # El «no» de otra frase no niega la petición.
+    assert not no("el bot no entiende, páseme con un asesor", L.PETICION_HUMANO)
+    assert not no("no sé qué pasa pero quiero hablar con una persona", L.PETICION_HUMANO)
+    assert not no("sí, acepto", L.ACEPTACION_CLIENTE)
