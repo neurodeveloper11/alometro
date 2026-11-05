@@ -24,6 +24,8 @@ EXTRAER = {
     "retencion": lambda s: s.retencion_antes_de_radicar is not None,
     "aceptacion": lambda s: s.aceptacion is not None,
     "amenaza_externa": lambda s: bool(s.amenazas_externas),
+    "sin_respuesta": lambda s: s.sin_respuesta is not None,
+    "trayectoria": lambda s: s.trayectoria,
 }
 
 

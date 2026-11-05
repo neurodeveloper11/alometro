@@ -19,6 +19,7 @@
 | R1 | Resuelve o deja trámite formal | 20 | Cierre cada contacto con una solución confirmada o con un radicado y un plazo concretos. | Resolución en el primer contacto (FCR): evita el recontacto, que es costo para la empresa y esfuerzo para el cliente. |
 | R2 | Radicado y plazo ante queja | 10 | Ante toda queja o reclamo entregue el número de radicado (CUN en telecomunicaciones) y el plazo legal de respuesta. | En telecomunicaciones la PQR se identifica con CUN y el operador tiene 15 días hábiles; en general la queja debe quedar trazable. |
 | R3 | Sin callejón sin salida | ⛔ crítico (cliente) | Si no puede resolver, nunca termine sin un siguiente paso: radique, escale o agende. | Un cliente sin solución ni camino convierte su caso en PQR, en queja ante la SIC o la CRC, o en abandono. |
+| R4 | El cliente recibe respuesta | ⛔ crítico (cliente) | Configure alertas de chats sin respuesta y un tiempo máximo de primera respuesta por canal. | Un mensaje sin respuesta es la peor experiencia posible: el cliente no sabe si alguien lo leyó. |
 
 ### Esfuerzo del cliente
 

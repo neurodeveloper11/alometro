@@ -40,6 +40,8 @@ def _limpiar(ev: list[Evidencia], anonimizar: bool) -> list[Evidencia]:
 
 def evaluar(conv: Conversacion, politica: Politica | None = None, criterios: Iterable[Criterio] = CRITERIOS) -> Evaluacion:
     politica = politica or Politica()
+    if not any(t.texto for t in conv.turnos):
+        raise ValueError(f"La conversación {conv.id!r} no tiene turnos con texto: no hay nada que evaluar.")
     s: Senales = analizar(conv)
     resultados: list[ResultadoCriterio] = []
     for cr in criterios:
@@ -88,5 +90,14 @@ def evaluar(conv: Conversacion, politica: Politica | None = None, criterios: Ite
     )
 
 
-def evaluar_lote(convs: Iterable[Conversacion], politica: Politica | None = None) -> list[Evaluacion]:
-    return [evaluar(c, politica) for c in convs]
+def evaluar_lote(convs: Iterable[Conversacion], politica: Politica | None = None,
+                 omitidas: list[str] | None = None) -> list[Evaluacion]:
+    """Evalúa todas las conversaciones; las vacías se omiten y su id se agrega a `omitidas`."""
+    res = []
+    for c in convs:
+        if not any(t.texto for t in c.turnos):
+            if omitidas is not None:
+                omitidas.append(c.id)
+            continue
+        res.append(evaluar(c, politica))
+    return res

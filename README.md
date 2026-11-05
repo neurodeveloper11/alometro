@@ -15,7 +15,7 @@ En Colombia, la queja más repetida sobre el servicio al cliente es que *no sirv
 
 ## Qué evalúa
 
-**39 criterios en 6 dimensiones**: Resolución, Esfuerzo del cliente, Trato humano, Asistente virtual, Proceso y guion, y Cumplimiento (Colombia). Incluye **10 errores críticos** que anulan la nota: callejón sin salida, atención humana negada, contención falsa, irrespeto, contacto fuera del horario de la Ley 2300, venta sin retracto o sin aceptación expresa, retención antes de radicar una cancelación, cobranza coercitiva y petición de claves u OTP.
+**40 criterios en 6 dimensiones**: Resolución, Esfuerzo del cliente, Trato humano, Asistente virtual, Proceso y guion, y Cumplimiento (Colombia). Incluye **11 errores críticos** que anulan la nota: mensaje sin respuesta, callejón sin salida, atención humana negada, contención falsa, irrespeto, contacto fuera del horario de la Ley 2300, venta sin retracto o sin aceptación expresa, retención antes de radicar una cancelación, cobranza coercitiva y petición de claves u OTP.
 
 Sobre el conjunto de interacciones calcula **16 indicadores de resultado**, entre ellos: resolución, recontacto a 7 días, peticiones de humano atendidas, bucles del bot, contención falsa frente a real, pérdida de contexto, desescalada emocional, % libre de errores críticos, esfuerzo y amenazas de queja ante la SIC.
 
@@ -39,6 +39,7 @@ alometro evaluar conversaciones.jsonl -o informe.html --json resultados.json --c
 alometro comparar enero.jsonl febrero.jsonl     # ¿mejoró de verdad?
 alometro calibrar conversaciones.jsonl etiquetas_analistas.csv
 alometro criterios                              # imprime la rúbrica
+alometro evaluar llamadas.jsonl --config ejemplos/config_operacion.json   # metas y pesos propios
 ```
 
 ```python
@@ -79,12 +80,14 @@ JSONL (una conversación por línea). Los roles son `cliente`, `agente`, `bot` y
 
 Los detectores son reglas léxicas explícitas (`src/alometro/lexicos.py`) evaluadas con conjuntos escritos a mano, con redacciones distintas a las de los datos de demostración:
 
-| Conjunto | Uso | Exactitud |
+| Conjunto | Momento de la medición | Exactitud |
 |---|---|---|
-| v1 (30 casos) | escrito antes de ajustar; luego se usó para ajustar | 0,77 antes de ajustar |
-| v2 ciego (29 casos) | escrito tras el ajuste con v1, antes de volver a tocar el motor | **0,65** (cifra honesta de la v0.1-pre) |
-| v3 ciego | ver [`eval/RESULTADOS.md`](eval/RESULTADOS.md) | cifra honesta de la v0.1 |
+| v1 (30 casos) | línea base, antes de ajustar | 0,77 |
+| v2 ciego (29) | tras ajustar con v1 | 0,65 |
+| v3 ciego (31) | tras las revisiones 1 y 2 | 0,70 |
+| **v4 ciego (22)** | tras ajustar con v3 | **0,87** (cifra vigente) |
 
+Cada cifra se midió **antes** de corregir los errores de ese conjunto; luego se corrigieron con reglas generales. Detalle y método en [`eval/RESULTADOS.md`](eval/RESULTADOS.md).
 Son conjuntos pequeños, sintéticos y escritos por el mismo autor de las reglas: sirven para detectar huecos, no como garantía. Por eso cada hallazgo trae evidencia y por eso existe `calibrar`.
 
 ## Desarrollo
@@ -92,7 +95,7 @@ Son conjuntos pequeños, sintéticos y escritos por el mismo autor de las reglas
 ```bash
 pip install -e ".[dev]"
 pytest
-python eval/evaluar.py eval/casos_v3_ciego.jsonl
+python eval/evaluar.py eval/casos_v4_ciego.jsonl
 python scripts/generar_criterios_md.py   # regenera CRITERIOS.md desde el código
 ```
 

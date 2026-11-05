@@ -105,6 +105,12 @@ def r3_sin_salida(c: Conversacion, s: Senales) -> Resultado:
     return _falla("El cliente terminó sin solución y sin siguiente paso (callejón sin salida).", s.evidencia_resolucion)
 
 
+def r4_respuesta(c: Conversacion, s: Senales) -> Resultado:
+    if s.sin_respuesta:
+        return _falla("El cliente escribió o habló y nadie de la empresa le respondió.", [s.sin_respuesta])
+    return _ok("La empresa respondió al cliente.")
+
+
 # ------------------------------ Esfuerzo ------------------------------------
 def e1_transferencias(c: Conversacion, s: Senales) -> Resultado:
     # El paso bot -> persona se evalúa en la dimensión del bot; aquí cuentan los traslados entre personas/áreas.
@@ -385,6 +391,9 @@ CRITERIOS: list[Criterio] = [
     Criterio("R3", "Sin callejón sin salida", "resolucion", 0, "cliente", r3_sin_salida,
              "Si no puede resolver, nunca termine sin un siguiente paso: radique, escale o agende.",
              "Un cliente sin solución ni camino convierte su caso en PQR, en queja ante la SIC o la CRC, o en abandono."),
+    Criterio("R4", "El cliente recibe respuesta", "resolucion", 0, "cliente", r4_respuesta,
+             "Configure alertas de chats sin respuesta y un tiempo máximo de primera respuesta por canal.",
+             "Un mensaje sin respuesta es la peor experiencia posible: el cliente no sabe si alguien lo leyó."),
     Criterio("E1", "Máximo una transferencia", "esfuerzo", 8, None, e1_transferencias,
              "Resuelva o transfiera una sola vez, con el caso documentado.",
              "Cada transferencia obliga a repetir el caso y aumenta el esfuerzo del cliente (CES)."),

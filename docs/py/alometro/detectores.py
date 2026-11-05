@@ -32,6 +32,7 @@ class Senales:
     datos_repedidos: list[Evidencia] = field(default_factory=list)
     contexto_reconocido: Evidencia | None = None
     abandono: bool = False
+    sin_respuesta: Evidencia | None = None
     # Emoción
     frustracion: list[float] = field(default_factory=list)
     frustracion_inicial: float = 0.0
@@ -105,6 +106,7 @@ class Senales:
             "carga_emocional_agente": self.carga_emocional,
             "amenaza_externa": bool(self.amenazas_externas),
             "abandono": self.abandono,
+            "sin_respuesta": self.sin_respuesta is not None,
             "queja": self.queja is not None,
             "radicado": self.radicado is not None,
             "plazo": self.plazo is not None,
@@ -147,6 +149,7 @@ def _puntaje_frustracion(texto: str, norm: str) -> float:
         p += 1
     if proporcion_mayusculas(texto) > 0.6:
         p += 2
+    p += min(4, 2 * contar(L.FRUSTRACION_EMOJI, texto))
     if buscar(L.POSITIVO_CLIENTE, norm):
         p -= 2
     return float(max(0, min(10, p)))
@@ -191,7 +194,7 @@ def analizar(conv: Conversacion) -> Senales:
         k_ini = max(1, n_f // 3)
         k_fin = 2 if n_f >= 4 else 1
         s.frustracion_inicial = max(s.frustracion[:k_ini])
-        s.frustracion_final = sum(s.frustracion[-k_fin:]) / k_fin
+        s.frustracion_final = max(s.frustracion[-k_fin:])  # para desescalar, los últimos turnos deben estar en calma
         s.frustracion_max = max(s.frustracion)
         pico = idx_cliente[s.frustracion.index(s.frustracion_max)]
         if s.frustracion_max > 0:
@@ -299,7 +302,10 @@ def analizar(conv: Conversacion) -> Senales:
                 s.plazo = _ev(i, t.rol, t.texto, frag)
 
     ultimos_cliente = idx_cliente[-3:]
-    no_res_cli = next(((i, f) for i in reversed(ultimos_cliente) if (f := buscar(L.NO_RESUELTO_CLIENTE, norms[i]))), None)
+    primera_respuesta = idx_empresa[0] if idx_empresa else len(turnos)
+    # Lo que el cliente dice antes de cualquier respuesta es su problema, no el resultado.
+    no_res_cli = next(((i, f) for i in reversed(ultimos_cliente)
+                       if i > primera_respuesta and (f := buscar(L.NO_RESUELTO_CLIENTE, norms[i]))), None)
     res_emp = next(((i, f) for i in reversed(idx_empresa) if (f := buscar(L.RESUELTO_EMPRESA, norms[i]))), None)
     res_cli = next(((i, f) for i in reversed(idx_cliente) if (f := buscar(L.RESUELTO_CLIENTE, norms[i]))), None)
     cortesia_final = bool(ultimos_cliente) and bool(
@@ -335,6 +341,10 @@ def analizar(conv: Conversacion) -> Senales:
         s.evidencia_resolucion.append(_ev(u, "cliente", turnos[u].texto))
     else:
         s.resolucion = "incierto"
+
+    # Sin respuesta: el cliente escribió y nadie de la empresa contestó después.
+    if idx_cliente and not any(i > idx_cliente[0] for i in idx_empresa):
+        s.sin_respuesta = _ev(idx_cliente[0], "cliente", turnos[idx_cliente[0]].texto)
 
     # Abandono: el cliente se va sin respuesta útil (último turno es suyo y está frustrado o pidiendo humano).
     if turnos and turnos[-1].rol == "cliente":
@@ -434,6 +444,8 @@ def analizar(conv: Conversacion) -> Senales:
         if frag:
             s.coercion.append(_ev(i, t.rol, t.texto, frag))
         frag = buscar(L.PIDE_CREDENCIAL, n)
+        if not frag and buscar(L.CREDENCIAL, n) and buscar(L.PIDE_ALGO, n):
+            frag = buscar(L.CREDENCIAL, n)
         if frag and not buscar(L.NEGACION_CREDENCIAL, n):
             s.pide_credencial.append(_ev(i, t.rol, t.texto, frag))
         for m in re.finditer(r"(?:\d[ -]?){13,19}", t.texto):

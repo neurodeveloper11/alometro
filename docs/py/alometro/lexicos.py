@@ -18,6 +18,9 @@ PETICION_HUMANO = compilar([
     rf"\b(hablar|comunicar(me)?|pasar(me)?|contactar(me)?|atender(me)?|comuniqueme|paseme|paseme|transfier(e|a)me|conecte(me)?|comunicame|pasame)\b.{{0,30}}\b{_PERSONA}\b",
     rf"\b(quiero|necesito|exijo|deme|denme|regaleme|un|una)\s+(un\s+|una\s+|con\s+un\s+|con\s+una\s+)?{_PERSONA}\b(?!\s+(me\s+)?(dijo|llamo|escribio|ofrecio|vino))",
     r"\b(persona|humano) (real|de verdad|de carne y hueso)\b",
+    r"\b(pasame|paseme|pasenme|comuniqueme|comunicame|comuniquenme|conecteme|conectame) con (un|una|alguien|el|la)\b",
+    r"\b(asesor|asesora|agente|operador|operadora) (humano|humana|real|de verdad)\b",
+    r"\b(un|una) (man|senor|senora|muchacho|muchacha|pelado|pelada) de verdad\b",
     r"\bno (quiero|me sirve|necesito) (hablar|chatear|escribir)?\s*(con )?(un |una |el |la )?(robot|maquina|bot|grabacion|contestadora|asistente virtual)\b",
     r"\b(robot|maquina|bot) no\b.{0,20}\b(entiende|sirve|ayuda)\b",
     r"^\s*(asesor|asesora|agente|humano|operador|persona)\s*[.!?]*\s*(por favor|porfa|ya)?\s*[.!?]*$",
@@ -68,7 +71,8 @@ FRUSTRACION_MEDIA = compilar([  # 2 puntos
     r"\bya (le|les|te|lo|se lo|se los) (dije|explique|conte|habia dicho|informe)\b",
     r"\bcomo (ya )?(le|les|te) dije\b",
     r"\b(tercera|cuarta|quinta|sexta|enesima) vez\b", r"\bvarias veces\b", r"\bmil veces\b",
-    r"\bllevo (mas de )?(\d+|un|una|dos|tres|cuatro|cinco|seis|varios|varias) (dias|dia|semanas|semana|meses|mes|horas|hora|anos)\b",
+    r"\bllevo (mas de )?(\d+|un|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|quince|veinte|muchos|muchas|varios|varias) (dias|dia|semanas|semana|meses|mes|horas|hora|anos)\b",
+    r"\bme (voy|paso|cambio) (para|a) (la competencia|otro (operador|banco|lado))\b", r"\bme voy a cambiar de\b", r"\bcancelo todo\b",
     r"\bnadie (me )?(soluciona|ayuda|responde|da razon|resuelve|contesta)\b",
     r"\bsigue igual\b", r"\bsigo (igual|sin)\b", r"\bsigue sin\b", r"\btodavia no\b", r"\baun no\b",
     r"\bno me (han|ha) (solucionado|resuelto|devuelto|respondido|llamado|arreglado)\b",
@@ -81,14 +85,18 @@ FRUSTRACION_LEVE = compilar([  # 1 punto
     r"\bayudeme por favor\b", r"\bnada que\b", r"\bdemasiado\b", r"\bdemorad[oa]\b",
     r"\bespere y espere\b", r"\bmucho tiempo\b", r"\bdisgustad[oa]\b",
 ])
+FRUSTRACION_EMOJI = compilar([r"[\U0001F621\U0001F92C\U0001F620\U0001F47F\U0001F4A2\U0001F44E\U0001F624\U0001F612\U0001F644\U0001F62B\U0001F629]"])  # 😡🤬😠👿💢👎😤😒🙄😫😩
 POSITIVO_CLIENTE = compilar([  # resta 2 puntos
     r"\b(muchas |mil |muy amable,? )?gracias\b", r"\bmuy amable\b", r"\bperfecto\b", r"\bexcelente\b",
     r"\bque bien\b", r"\bsuper\b", r"\bme sirvio\b", r"\bgenial\b", r"\bbuenisimo\b",
     r"\bdios (le|te) pague\b", r"\bque amable\b",
 ])
-ACUSE_CLIENTE = compilar([r"^\s*(ok|okey|okay|vale|entendido|de acuerdo|listo|bueno|perfecto|entiendo)\s*[.!]*\s*$"])
+ACUSE_CLIENTE = compilar([
+    r"^\s*(ah+ |aa+h? |ahh+ |oh |uy )?(ok|okey|okay|vale|entendido|de acuerdo|listo|bueno|perfecto|entiendo|ya entendi|ya entiendo|claro|dale)\b[^?]{0,25}$",
+    r"\bera eso\b",
+])
 AMENAZA_EXTERNA = compilar([
-    r"\bsuperintendencia\b", r"\bsuper(industria|financiera|salud|servicios)\b", r"\bsic\b",
+    r"\b(queja|quejar\w*|denunci\w*|demand\w*|report\w*|acudir|ir|voy|vamos|llevar\w*|elevar\w*|poner\w*|radicar\w*)\b.{0,30}\b(superintendencia|superindustria|superfinanciera|supersalud|superservicios|sic|super)\b",
     r"\btutela\b", r"\bdemandar(los|las|la|lo)?\b", r"\blos demando\b", r"\buna demanda (contra|a)\b",
     r"\b(voy a|vamos a|los voy a)\b.{0,30}\b(abogad[oa]|demanda|tutela)\b", r"\bmi abogad[oa] (los|lo|las|va a|les)\b",
     r"\b(quejar|queja|denunciar|demandar|reportar)\w*\b.{0,15}\b(ante|en|a) (la )?(super|superintendencia|sic|superfinanciera|supersalud|defensoria)\b",
@@ -97,7 +105,7 @@ AMENAZA_EXTERNA = compilar([
     r"\b(voy a|los voy a|lo voy a|la voy a)\s+(publicar|subir|quemar|exponer|denunciar|poner|escrachar)\b.{0,30}\b(redes|twitter|instagram|tiktok|facebook)\b",
     r"\b(publicar|subir|contar|poner)(lo|la)? en (redes sociales|las redes|twitter|instagram|tiktok|facebook)\b",
     r"\bdefensor(ia)? del consumidor\b", r"\bvoy a (publicar|poner una queja formal)\b",
-    r"\bcrc\b",
+    r"\b(queja|quejar\w*|denunci\w*|report\w*|poner\w*)\b.{0,20}\bcrc\b",
 ])
 INSULTOS = compilar([
     r"\bidiotas?\b", r"\bestupid[oa]s?\b", r"\bimbeciles?\b", r"\binutil(es)?\b",
@@ -120,12 +128,14 @@ RESUELTO_EMPRESA = compilar([
     r"\b(el|la|su) (ajuste|devolucion|reverso|cambio|reintegro|abono|descuento) (ya )?(quedo|se aplico|fue aplicado|queda aplicado)\b",
     r"\bqueda(ra)? reflejado\b", r"\bproblema (quedo )?(solucionado|resuelto)\b",
     r"\bya (puede|puedes) (ingresar|usar|navegar|llamar|disfrutar)\b",
+    r"\bya (se lo |se la |se los |se las |le |lo |la |te )?(envie|mande|aplique|active|corregi|reverse|devolvi|cambie|actualice|desbloquee|programe|solucione|arregle|restableci|habilite|genere|reenvie|abone|cancele|anule)\b",
 ])
 RESUELTO_CLIENTE = compilar([
     r"\bya (me )?(funciona|sirve|aparece|llego|quedo|entro|carga|conecta|abre)\b",
     r"\b(quedo|esta) (solucionado|resuelto|listo)\b", r"\bya me (solucionaron|resolvieron|ayudaron|llego)\b",
     r"\b(perfecto|listo|excelente|super|genial|muy bien),? (muchas |mil )?gracias\b",
     r"\bme (sirvio|ayudo) (mucho|bastante)?\b", r"\bproblema resuelto\b", r"\bya funciona\b",
+    r"^\s*(si,? )?(ya )?(llego|me llego|volvio|ya volvio|funciono|ya pude|pude entrar)\b",
 ])
 NO_RESUELTO_EMPRESA = compilar([
     r"\bno (le |te |les )?(puedo|podemos|es posible) (ayudar|hacer nada|solucionar|resolver|colaborar)\b",
@@ -138,6 +148,7 @@ NO_RESUELTO_EMPRESA = compilar([
     r"\bno (le |te )?(se|sabria|sabemos|puedo) (decir|informar|dar razon|confirmar)\b",
     r"\b(ese|este|eso|ese tipo de) (tema|caso|asunto|tramite)?\s*no (lo )?(manejo|manejamos|vemos|tramitamos|es de aqui)\b",
     r"\bno (lo|la) (tengo|tenemos|manejo|manejamos)\b", r"\bno (le |te )?(puedo|podemos) dar (esa )?(informacion|razon)\b",
+    r"\btoca esperar\b", r"\bno (tengo|tenemos|hay) (agenda|cupo|disponibilidad|citas|tecnicos)\b",
     r"\b(tiene|tienes|toca|hay) que esperar\b(?!.{0,30}\b(dias|horas|semanas)\b)", r"\beso se demora\b",
 ])
 NO_RESUELTO_CLIENTE = compilar([
@@ -155,13 +166,15 @@ NO_RESUELTO_CLIENTE = compilar([
 # ---------------------------------------------------------------------------
 QUEJA_CLIENTE = compilar([
     r"\bqueja\b", r"\breclamo\b", r"\breclamar\b", r"\bpqrs?\b", r"\bderecho de peticion\b",
-    r"\bcobr(o|aron|an)\b.{0,30}\b(no reconozco|que no|indebid|de mas|doble|sin autoriz|sin que)\b",
+    r"\bcobr\w*\b.{0,40}\b(no reconozco|que no|indebid|de mas|doble|sin autoriz|sin que|que (ya )?cancele|que no (pedi|solicite|autorice))",
+    r"\bme (estan|siguen|siguieron) cobrando\b",
     r"\b(no reconozco|no autorice|no he autorizado)\b", r"\breembolso\b", r"\bdevolucion de (mi |la )?(plata|dinero)\b",
     r"\binconformidad\b", r"\bme cobraron\b",
 ])
 RADICADO = compilar([
     r"\bnumero de (pqrs?|peticion|queja|reclamo|reclamacion|radicado|caso|ticket|solicitud|seguimiento|tramite|incidente|requerimiento|servicio)\b\D{0,20}[a-z0-9-]*\d{4,}",
-    r"\b(solicitud|reclamo|reclamacion|queja|peticion|pqrs?|caso|requerimiento|incidencia)\b.{0,25}\b(numero|no\.?|#|n°)\s*[a-z0-9-]*\d{4,}",
+    r"\b(solicitud|reclamo|reclamacion|queja|peticion|pqrs?|caso|requerimiento|incidencia)\b.{0,25}(\b(numero|no\.?|n°)|#)\s*[a-z0-9-]*\d{4,}",
+    r"\bradicad[oa]\b.{0,50}?\d{4,}", r"\b(con el|bajo el) (numero|codigo|consecutivo)\s*[a-z0-9-]*\d{4,}",
     r"\b(radicado|radicacion|cun|codigo unico|numero de (caso|solicitud|radicado|ticket|seguimiento|reclamo|queja|tramite|incidente)|ticket|caso)\b\D{0,30}?[a-z0-9-]*\d{4,}[a-z0-9-]*",
 ])
 PLAZO = compilar([
@@ -190,7 +203,8 @@ REDIRECCION = compilar([
     r"\b(debe|tiene que|toca|debera|tendria que)\b.{0,25}\b(por|en|a traves de|desde|mediante)\s+(la |el |nuestra |nuestro |una )?(pagina|web|app|aplicacion|correo|portal|oficina|sucursal|sede|linea|formulario)\b",
     r"\b(comuniquese|contacte|llame|escriba|dirijase|acuda)\b.{0,10}\b(con|a)\s+(la|el)\s+(transportadora|proveedor|fabricante|banco|eps|aseguradora|entidad|operador|tienda|almacen)\b",
     r"\b(tiene que|tienes que|debe|debes|debera|toca|tendria que)\s+(acercarse|acercarte|ir|dirigirse|dirigirte|acudir|llamar|escribir|ingresar|entrar)\b.{0,30}\b(oficina|sede|sucursal|punto|pagina|web|app|aplicacion|correo|linea|portal|whatsapp)\b",
-    r"\b(ingrese|ingresa|entre|entra|descargue|descarga|escriba|escribe|envie|envia|mande|acerquese|dirijase|debe ir|tiene que ir|consulte|consulta|llame|llama)\b.{0,35}\b(pagina|web|app|aplicacion|correo|oficina|punto de atencion|sucursal|portal|whatsapp|linea|sede|formulario|pagina web)\b",
+    r"(?<!ya se lo )(?<!ya se la )(?<!ya le )(?<!ya te )\b(ingrese|ingresa|entre|entra|descargue|descarga|escriba|escribe|acerquese|dirijase|debe ir|tiene que ir|consulte|consulta|llame|llama)\b.{0,35}\b(pagina|web|app|aplicacion|correo|oficina|punto de atencion|sucursal|portal|whatsapp|linea|sede|formulario|pagina web)\b",
+    r"\b(envie|envienos|mande|mandenos)\b.{0,8}\b(un|el|la|su) (correo|mensaje|solicitud|formulario|documento|carta)\b",
 ])
 
 # Solicitudes de datos (para detectar pérdida de contexto)
@@ -211,7 +225,8 @@ _SIN_VERBO = {
     "cuenta": r"(numero de (cuenta|contrato|cliente|factura|pedido|orden|poliza|credito|referencia)|poliza|contrato)",
     "direccion": r"(direccion)",
 }
-DATOS = {k: compilar([v, rf"\b(su|tu|el|la)\s+(numero de\s+)?{_SIN_VERBO[k]}\b[^.?]{{0,20}}(por favor|porfa|\?)"]) for k, v in DATOS.items()}
+DATOS = {k: compilar([v, rf"\b(su|tu|el|la)\s+(numero de\s+)?{_SIN_VERBO[k]}\b[^.?]{{0,20}}(por favor|porfa|\?)",
+                       rf"\b(que|cual|cuales)\b.{{0,15}}\b{_SIN_VERBO[k]}\b[^.]{{0,40}}\?"]) for k, v in DATOS.items()}
 CONTEXTO_RECONOCIDO = compilar([
     r"\b(veo|ya veo|observo|reviso) (que|en el historial|en el sistema|la conversacion|lo que)\b",
     r"\b(segun|de acuerdo con) (lo que|la conversacion|el historial|lo que (le )?(escribio|conto|indico))\b",
@@ -375,7 +390,9 @@ OFERTA = compilar([
     r"\boferta\b", r"\bbeneficio\b", r"\bplan (especial|exclusivo|mas economico|mejorado)\b", r"\bsolo por hoy\b",
     r"\bunica oportunidad\b", r"\bultima oportunidad\b", r"\bgratis\b", r"\bbono\b", r"\bme regala (un|unos) (minutos|minutico)\b.{0,20}\bexplic",
     r"\bantes de (cancelar|que cancele|irse|retirarse)\b", r"\bantes (dejeme|permitame|quiero) (contarle|ofrecerle|decirle|mostrarle|comentarle)\b",
-    r"\btenemos (un|una) (plan|oferta|promocion|opcion|tarifa)\b", r"\b\d+ ?% (menos|de descuento|mas barato)\b", r"\bno se (vaya|retire)\b", r"\b(le|te) mejoro\b", r"\bpiense(lo)?\b",
+    r"\btenemos (un|una) (plan|oferta|promocion|opcion|tarifa)\b",
+    r"\b(le|te) (podemos|puedo|podriamos) (quitar|bajar|rebajar|exonerar|eliminar|mejorar|congelar|dejar|regalar|bonificar)\b",
+    r"\bantes de (eso|hacerlo|proceder|radicar|tramitar)\b", r"\b\d+ ?% (menos|de descuento|mas barato)\b", r"\bno se (vaya|retire)\b", r"\b(le|te) mejoro\b", r"\bpiense(lo)?\b",
 ])
 
 # ---------------------------------------------------------------------------
@@ -389,8 +406,10 @@ COERCION_COBRANZA = compilar([
     r"\b(llamar|contactar|avisar|informar|escribir)(le)? a (su|tu|sus|tus|las|los) (codeudor(es)?|fiador(es)?|familia|familiares|jefe|empresa|referencias|esposa|esposo|mama|papa|vecinos|companeros)\b",
     r"\b(su|tu) (familia|jefe|empresa|esposa|esposo|mama) se va a enterar\b", r"\b(va|vas) a perder (su|tu) (casa|trabajo)\b",
     r"\b(problemas|consecuencias) legales (graves|inmediat)\b",
+    r"\b(llam\w*|inform\w*|avis\w*|contact\w*|escrib\w*)\b.{0,25}\b(su|tu) (empresa|trabajo|oficina|jefe|jefa|empleador)\b",
+    r"\brecursos humanos\b",
     r"\b(mandar|enviar|mandarle|enviarle|mandamos|enviamos)\b.{0,10}\b(un |una )?(cobrador|cobradora|abogado|gestor|alguien|visita)\b.{0,25}\b(casa|oficina|trabajo|empresa|domicilio)\b",
-    r"\b(hablamos|hable|llamamos|llame|contactamos|escribimos|le contamos|le dijimos)\b.{0,10}\b(con|a) (su|tu|sus|tus) (mama|papa|familia|familiares|esposa|esposo|jefe|jefa|hermano|hermana|hijo|hija|vecinos?|referencias?|companeros)\b",
+    r"\b(hablamos|hable|llamamos|llame|contactamos|escribimos|contamos|dijimos|avisamos|dejamos (razon|recado|mensaje|el mensaje)|deje (razon|recado|mensaje))\b.{0,30}\b(su|tu|sus|tus) (mama|papa|familia|familiares|esposa|esposo|jefe|jefa|hermano|hermana|hijo|hija|vecin[oa]s?|referencias?|companer[oa]s?|pareja|novia|novio|suegr[oa])\b",
 ])
 PIDE_CREDENCIAL = compilar([
     r"\b(me|nos) (regala|regalas|da|das|dicta|dictas|indica|indicas|confirma|confirmas|comparte|compartes|digita|dice|dices|envia|envias)\b.{0,30}\b(clave|contrasena|pin|cvv|cvc|codigo de seguridad|token|codigo otp|otp|codigo (que|de verificacion que) (le|te) (llego|llegara|enviamos))\b",
@@ -398,11 +417,18 @@ PIDE_CREDENCIAL = compilar([
     r"\b(numeros|digitos|codigo)\b.{0,15}\b(de atras|del reverso|de seguridad|del respaldo)\b.{0,15}\b(de )?(la|su|tu) tarjeta\b",
     r"\bcual es (su|tu) (clave|contrasena|pin|cvv)\b",
     r"\b(escribame|escriba|escribe|digame|dime|dicteme|dicte|dicta|regaleme|regalame|deme|dame|me dice|me da|me dicta|me regala|me confirma|confirmeme|digite|envieme|enviame|pasame|paseme|me pasa|leame)\b.{0,40}\bcodigo\b.{0,50}\b(llego|llega|llegar|acaba de llegar|enviamos|envie|sms|mensaje|celular|correo)\b",
-    r"\b(numero completo|los 16 digitos|todos los numeros)\b.{0,20}\btarjeta\b", r"\btarjeta\b.{0,50}\bfecha de (vencimiento|expiracion)\b",
+    r"\b(numero completo|los 16 digitos|todos los numeros)\b.{0,20}\btarjeta\b",
+    r"\b(mensaje|sms|codigo|numeros|digitos)\b.{0,60}\b(me|nos) (los|lo|la|las) (puede|podria|quiere) (leer|dictar|decir|dar|confirmar|compartir)\b",
+    r"\b(leamelos|dictemelos|digamelos|leamelo|dictemelo|digamelo)\b", r"\btarjeta\b.{0,50}\bfecha de (vencimiento|expiracion)\b",
+])
+CREDENCIAL = compilar([r"\b(token|otp|clave( dinamica| del cajero| de la app| de internet)?|contrasena|pin|cvv|cvc|codigo de (seguridad|verificacion|acceso))\b"])
+PIDE_ALGO = compilar([
+    r"\b(me|nos) (lo |la )?(da|dice|dicta|regala|lee|confirma|pasa|comparte|envia|escribe|digita)\b",
+    r"\b(digame|dimelo|dicteme|leame|lea|lee|deme|dame|regaleme|confirmeme|paseme|pasame|escribame|digite|dicte|indique|comparta|envie|mande|necesito|requiero)\b",
 ])
 NEGACION_CREDENCIAL = compilar([
     r"\bnunca (le |te )?(pediremos|solicitaremos|pedimos|solicitamos|vamos a pedir)\b", r"\bno (le |te )?(pediremos|solicitaremos|vamos a pedir)\b",
-    r"\bno (la |lo )?comparta(s)?\b", r"\bnunca (la |lo |se la |se lo )?(comparta|compartas|de|des|entregue|revele|digas|diga)\b", r"\bno (se la |se lo )?(de|des) a nadie\b",
+    r"\bno (la |lo )?comparta(s)?\b", r"\b(ningun|nadie|ningun funcionario|ningun asesor)\b.{0,30}\b(va a pedir|pedira|solicitara|lo pide|la pide|se lo va a pedir)", r"\bnunca (la |lo |se la |se lo )?(comparta|compartas|de|des|entregue|revele|digas|diga)\b", r"\bno (se la |se lo )?(de|des) a nadie\b",
 ])
 
 # ---------------------------------------------------------------------------
