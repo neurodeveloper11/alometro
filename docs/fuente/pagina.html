@@ -37,6 +37,9 @@ p{margin:0}
 .mono{font-family:var(--f-mono)}
 .num{font-variant-numeric:tabular-nums}
 section{padding-block:72px 8px}
+section,#ejemplos,#vivo-informe,#demo-titulo{scroll-margin-top:72px}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 .intro{display:grid;gap:12px;max-width:68ch;margin-bottom:32px}
 .intro p{color:var(--ink-2);font-size:1.05rem}
 
@@ -226,8 +229,8 @@ footer .envoltura{display:grid;gap:8px}
         <h1 style="margin-top:14px">Mide si tu servicio al cliente <em>de verdad ayuda</em>.</h1>
         <p class="bajada">Alómetro lee cada llamada, chat y conversación con bot, y responde con evidencia: ¿se resolvió?, ¿cuánto le costó al cliente?, ¿pudo hablar con una persona?, ¿salió más tranquilo o más bravo?, ¿se cumplió la ley?</p>
         <div class="acciones">
-          <a class="boton primario" href="#probar">Ver una evaluación</a>
-          <a class="boton secundario" href="#criterios">Leer los criterios</a>
+          <a class="boton primario" href="#probar">Probar con mis archivos</a>
+          <a class="boton secundario" href="#ejemplos">Ver ejemplos</a>
         </div>
         <div class="cifras" id="cifras"></div>
       </div>
@@ -287,26 +290,11 @@ footer .envoltura{display:grid;gap:8px}
   <section id="probar">
     <div class="envoltura">
       <div class="intro">
-        <p class="etiqueta">Evaluaciones reales del motor</p>
-        <h2>Elige una conversación y mira qué encuentra.</h2>
-        <p>Son conversaciones sintéticas que reproducen problemas frecuentes en Colombia. Los resultados los calculó el motor de Alómetro, no están escritos a mano. Pasa el cursor sobre una etiqueta para ver el criterio.</p>
+        <p class="etiqueta">Probar</p>
+        <h2>Sube tus conversaciones y obtén el informe.</h2>
+        <p>Arrastra los archivos tal como salen de tu sistema. Si prefieres ver primero cómo funciona, <a href="#ejemplos">mira los ejemplos</a> más abajo.</p>
       </div>
-      <div class="selector" id="selector" role="group" aria-label="Conversaciones de ejemplo"></div>
-      <div class="demo">
-        <div class="tarjeta">
-          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:4px">
-            <h3 id="demo-titulo"></h3>
-            <div class="meta-conv" id="demo-meta"></div>
-          </div>
-          <div class="transcripcion" id="demo-transcripcion"></div>
-        </div>
-        <div class="lateral">
-          <div class="tarjeta bloque"><div class="medidor" id="demo-medidor"></div><ul class="lista-criticos" id="demo-criticos"></ul></div>
-          <div class="tarjeta bloque"><p class="etiqueta">Por dimensión</p><div class="dims" id="demo-dims"></div></div>
-          <div class="tarjeta bloque"><p class="etiqueta">Qué mejorar primero</p><ol class="recs" id="demo-recs"></ol></div>
-        </div>
-      </div>
-      <div class="tarjeta vivo" id="vivo">
+      <div class="tarjeta vivo" id="vivo" style="margin-top:0">
         <h3>Evalúa tus propias conversaciones</h3>
         <p class="estado" id="vivo-intro"></p>
         <label class="zona" id="zona" for="archivos">
@@ -332,6 +320,27 @@ Cliente: otra vez?? ya se la di al bot</textarea>
         <div id="vivo-informe" hidden style="display:grid;gap:12px">
           <div class="fila"><h3 id="vivo-informe-titulo" style="margin-right:auto"></h3><button class="boton secundario" id="vivo-descargar" type="button">Descargar informe (.html)</button></div>
           <iframe class="informe-marco" id="vivo-marco" title="Informe de Alómetro de tus archivos"></iframe>
+        </div>
+      </div>
+
+      <div class="intro" id="ejemplos" style="margin-top:56px">
+        <p class="etiqueta">Ejemplos calculados por el motor</p>
+        <h2>Elige una conversación y mira qué encuentra.</h2>
+        <p>Son conversaciones sintéticas que reproducen problemas frecuentes en Colombia. Los resultados los calculó el motor de Alómetro, no están escritos a mano. Pasa el cursor sobre una etiqueta para ver el criterio. Cuando evalúas un solo archivo o un texto pegado, su resultado también aparece aquí.</p>
+      </div>
+      <div class="selector" id="selector" role="group" aria-label="Conversaciones de ejemplo"></div>
+      <div class="demo">
+        <div class="tarjeta">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--line);display:grid;gap:4px">
+            <h3 id="demo-titulo"></h3>
+            <div class="meta-conv" id="demo-meta"></div>
+          </div>
+          <div class="transcripcion" id="demo-transcripcion"></div>
+        </div>
+        <div class="lateral">
+          <div class="tarjeta bloque"><div class="medidor" id="demo-medidor"></div><ul class="lista-criticos" id="demo-criticos"></ul></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Por dimensión</p><div class="dims" id="demo-dims"></div></div>
+          <div class="tarjeta bloque"><p class="etiqueta">Qué mejorar primero</p><ol class="recs" id="demo-recs"></ol></div>
         </div>
       </div>
     </div>
