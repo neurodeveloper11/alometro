@@ -202,7 +202,7 @@ footer .envoltura{display:grid;gap:8px}
       Alómetro
     </a>
     <nav class="nav" aria-label="Secciones">
-      <a href="#problema">Problema</a><a href="#como">Cómo funciona</a><a href="#probar">Probar</a><a href="#criterios">Criterios</a><a href="#verificar">Verificación</a>
+      <a href="#problema">Problema</a><a href="#como">Cómo funciona</a><a href="#probar">Probar</a><a href="#coaching">Coaching</a><a href="#criterios">Criterios</a><a href="#verificar">Verificación</a>
       <a class="gh" href="https://github.com/neurodeveloper11/alometro">GitHub</a>
     </nav>
   </div>
@@ -265,11 +265,11 @@ footer .envoltura{display:grid;gap:8px}
         <p>Sin modelos opacos ni APIs externas: cada conclusión apunta al turno y a la frase que la respalda, para que un analista de calidad pueda auditarla en segundos.</p>
       </div>
       <div class="pasos">
-        <div class="paso"><h3>Transcripciones</h3><p>Llamadas transcritas, chats o WhatsApp en JSONL, CSV o texto. Roles: cliente, agente, bot y sistema.</p></div>
+        <div class="paso"><h3>Transcripciones</h3><p>Chats, WhatsApp o llamadas transcritas (.srt, .vtt, .txt, JSONL, CSV). Si el motor de voz entrega hablantes anónimos (SPEAKER_00), Alómetro infiere quién es el agente.</p></div>
         <div class="paso"><h3>Anonimización</h3><p>Cédulas, teléfonos, correos, tarjetas y direcciones se ocultan en las evidencias. Los radicados se conservan.</p></div>
-        <div class="paso"><h3>Señales con evidencia</h3><p>Petición de humano, bucles, datos repetidos, frustración por turno, resolución, radicados, ofertas, amenazas.</p></div>
+        <div class="paso"><h3>Señales con evidencia</h3><p>Petición de humano, bucles, datos repetidos, frustración por turno, resolución, radicados, ofertas, amenazas. Entiende negaciones: «no necesito un asesor» no es una petición.</p></div>
         <div class="paso"><h3>Rúbrica</h3><p id="paso-rubrica">Criterios en seis dimensiones y errores críticos que anulan la nota.</p></div>
-        <div class="paso"><h3>Indicadores</h3><p>Metas con intervalo de confianza, recontacto a 7 días y comparación antes/después con significancia.</p></div>
+        <div class="paso"><h3>Indicadores y coaching</h3><p>Metas con intervalo de confianza, comparación antes/después con significancia y un plan de entrenamiento por agente.</p></div>
       </div>
     </div>
   </section>
@@ -313,6 +313,18 @@ Cliente: otra vez?? ya se la di al bot</textarea>
     </div>
   </section>
 
+  <section id="coaching">
+    <div class="envoltura">
+      <div class="intro">
+        <p class="etiqueta">Plan de coaching por agente</p>
+        <h2>Qué entrenar primero, con un ejemplo real para la sesión uno a uno.</h2>
+        <p>Para cada agente, Alómetro elige sus tres prioridades comparándolo con los demás agentes: primero los errores críticos, luego lo que más pesa. Si todo el equipo falla igual, lo marca como <b>proceso</b>: hay que corregir el guion, el sistema o la política, no a la persona. También muestra sus fortalezas, para reconocer y no solo corregir.</p>
+      </div>
+      <div class="tres" id="coaching-planes"></div>
+      <p class="nota" style="margin-top:10px">Planes calculados por el motor sobre la operación sintética de la sección de verificación. Se exportan con «alometro evaluar … --coaching coaching.csv».</p>
+    </div>
+  </section>
+
   <section id="criterios">
     <div class="envoltura">
       <div class="intro">
@@ -351,12 +363,14 @@ Cliente: otra vez?? ya se la di al bot</textarea>
         <pre><code>pip install "git+https://github.com/neurodeveloper11/alometro.git"
 
 alometro demo
-alometro evaluar llamadas.jsonl -o informe.html --csv notas.csv
+alometro evaluar llamadas.jsonl -o informe.html --csv notas.csv --coaching coaching.csv
+alometro evaluar grabaciones/          # .srt / .vtt con SPEAKER_00, SPEAKER_01…
 alometro comparar septiembre.jsonl octubre.jsonl
 alometro calibrar llamadas.jsonl etiquetas_analistas.csv</code></pre>
         <ul class="garantias">
           <li><b>100 % local.</b> No envía transcripciones a internet ni usa APIs de terceros. Corre en un portátil, en un servidor de la empresa o en el navegador.</li>
           <li><b>Sin dependencias.</b> Python 3.10 o superior y nada más.</li>
+          <li><b>Lee grabaciones transcritas.</b> Subtítulos .srt y .vtt de Whisper, AWS, Google o Azure, con inferencia del rol de cada hablante.</li>
           <li><b>Auditable.</b> Cada hallazgo cita turno y frase; las evidencias se anonimizan.</li>
           <li><b>Hecho para Colombia.</b> Festivos de la Ley Emiliani, Ley 2300, Estatuto del Consumidor, Habeas Data y reglas de la CRC.</li>
           <li><b>Aviso.</b> Es una ayuda para los equipos de calidad: no reemplaza la revisión humana ni la asesoría jurídica.</li>
@@ -490,6 +504,18 @@ function pintarCriterios() {
   }).join("");
 }
 
+function pintarCoaching() {
+  $("#coaching-planes").innerHTML = DATOS.coaching.map((p) => `<div class="tarjeta" style="padding:20px;display:grid;gap:12px;align-content:start">
+    <div><h3>Agente ${esc(p.agente_id)}</h3><p class="nota">${p.interacciones} interacciones · puntaje promedio ${String(p.puntaje_promedio).replace(".", ",")}</p></div>
+    ${p.prioridades.map((c, i) => `<div style="display:grid;gap:4px;border-top:1px solid var(--line);padding-top:10px">
+      <p><b>${i + 1}. ${esc(c.criterio)}</b> ${esc(c.nombre)} ${c.critico ? '<span class="chip falla">crítico</span>' : ""} ${c.origen === "proceso" ? '<span class="chip">proceso</span>' : ""}</p>
+      <p class="nota">Falla en ${c.fallas} de ${c.aplica} (${pct(c.tasa)}) · equipo ${pct(c.tasa_equipo)}</p>
+      <p style="font-size:.92rem;color:var(--ink-2)">${esc(c.recomendacion)}</p>
+      ${c.ejemplo && c.ejemplo.cita ? `<p class="nota">Ejemplo, turno ${c.ejemplo.turno}: «${esc(c.ejemplo.cita)}»</p>` : c.ejemplo ? `<p class="nota">${esc(c.ejemplo.detalle)}</p>` : ""}
+    </div>`).join("")}
+    <p class="nota"><b>Fortalezas:</b> ${p.fortalezas.map((f) => esc(f.criterio + " " + f.nombre)).join(", ") || "—"}</p></div>`).join("");
+}
+
 function fmtValor(v, u) { return v == null ? "—" : u === "%" ? pct(v, 1) : v.toFixed(1).replace(".", ","); }
 
 function pintarVerificacion() {
@@ -586,5 +612,5 @@ function prepararVivo() {
   });
 }
 
-pintarHero(); pintarProblemas(); pintarSelector(); pintarDemo(0); pintarCriterios(); pintarVerificacion(); prepararVivo();
+pintarHero(); pintarProblemas(); pintarSelector(); pintarDemo(0); pintarCoaching(); pintarCriterios(); pintarVerificacion(); prepararVivo();
 </script>

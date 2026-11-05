@@ -17,6 +17,8 @@ En Colombia, la queja más repetida sobre el servicio al cliente es que *no sirv
 
 **40 criterios en 6 dimensiones**: Resolución, Esfuerzo del cliente, Trato humano, Asistente virtual, Proceso y guion, y Cumplimiento (Colombia). Incluye **11 errores críticos** que anulan la nota: mensaje sin respuesta, callejón sin salida, atención humana negada, contención falsa, irrespeto, contacto fuera del horario de la Ley 2300, venta sin retracto o sin aceptación expresa, retención antes de radicar una cancelación, cobranza coercitiva y petición de claves u OTP.
 
+Además entrega un **plan de coaching por agente**: sus 3 prioridades frente a los demás agentes, con la recomendación, un ejemplo real con cita y sus fortalezas. Distingue lo que es del agente de lo que es del **proceso** (si todo el equipo falla igual, se corrige el guion, el sistema o la política, no a la persona).
+
 Sobre el conjunto de interacciones calcula **16 indicadores de resultado**, entre ellos: resolución, recontacto a 7 días, peticiones de humano atendidas, bucles del bot, contención falsa frente a real, pérdida de contexto, desescalada emocional, % libre de errores críticos, esfuerzo y amenazas de queja ante la SIC.
 
 Todos los criterios, pesos, metas y fundamentos están en **[CRITERIOS.md](CRITERIOS.md)**.
@@ -35,7 +37,8 @@ pip install "alometro[privacidad] @ git+https://github.com/neurodeveloper11/alom
 
 ```bash
 alometro demo                                   # datos sintéticos + informes de ejemplo
-alometro evaluar conversaciones.jsonl -o informe.html --json resultados.json --csv resultados.csv
+alometro evaluar conversaciones.jsonl -o informe.html --json resultados.json --csv resultados.csv --coaching coaching.csv
+alometro evaluar grabaciones/                   # .srt / .vtt / .txt de su motor de voz a texto
 alometro comparar enero.jsonl febrero.jsonl     # ¿mejoró de verdad?
 alometro calibrar conversaciones.jsonl etiquetas_analistas.csv
 alometro criterios                              # imprime la rúbrica
@@ -68,6 +71,16 @@ JSONL (una conversación por línea). Los roles son `cliente`, `agente`, `bot` y
 * `inicio`, `cliente_id` y `direccion` habilitan el recontacto a 7 días y las reglas de horario y frecuencia de la Ley 2300.
 * También acepta CSV (una fila por turno) y texto plano (`Agente: …` / `Cliente: …`). Ver `src/alometro/cargar.py` y la carpeta `ejemplos/`.
 
+### Grabaciones transcritas (voz a texto)
+
+Los motores con diarización (Whisper + pyannote, AWS Transcribe, Google, Azure) entregan hablantes anónimos: `SPEAKER_00`, `Hablante 1`, `spk_0`. Alómetro lee `.txt`, `.srt` y `.vtt` con esas etiquetas e **infiere quién es el agente** por lo que dice (se presenta, saluda en nombre de la empresa, indaga, verifica identidad, pide datos; el cliente pide, pregunta y se queja). La inferencia queda en `metadatos["roles_inferidos"]`; si la diferencia entre hablantes es pequeña se marca `"_confianza": "baja"` y la CLI avisa. Para fijarlos a mano:
+
+```bash
+alometro evaluar llamada.srt --roles SPEAKER_00=cliente,SPEAKER_01=agente
+```
+
+Exactitud de la inferencia (`python eval/evaluar_roles.py`): 1,00 en 256 conversaciones sintéticas completas y 0,91 en 68 fragmentos escritos a mano de 2-6 turnos, muchos sin saludo (el caso difícil; esos fragmentos se usaron también para ajustar las pistas).
+
 ## Cómo verificar que se está logrando el objetivo
 
 1. **Línea base**: evalúe 4 semanas antes de cambiar nada (≈ 385 interacciones por periodo dan ±5 puntos de precisión).
@@ -85,7 +98,8 @@ Los detectores son reglas léxicas explícitas (`src/alometro/lexicos.py`) evalu
 | v1 (30 casos) | línea base, antes de ajustar | 0,77 |
 | v2 ciego (29) | tras ajustar con v1 | 0,65 |
 | v3 ciego (31) | tras las revisiones 1 y 2 | 0,70 |
-| **v4 ciego (22)** | tras ajustar con v3 | **0,87** (cifra vigente) |
+| v4 ciego (22) | tras ajustar con v3 | 0,87 |
+| **v5 ciego (16)** | antes de la mejora de negaciones; los 5 errores eran negaciones («no necesito un asesor») | **0,75** → 1,00 tras corregir, sin regresiones en v1-v4 |
 
 Cada cifra se midió **antes** de corregir los errores de ese conjunto; luego se corrigieron con reglas generales. Detalle y método en [`eval/RESULTADOS.md`](eval/RESULTADOS.md).
 Son conjuntos pequeños, sintéticos y escritos por el mismo autor de las reglas: sirven para detectar huecos, no como garantía. Por eso cada hallazgo trae evidencia y por eso existe `calibrar`.
@@ -95,7 +109,8 @@ Son conjuntos pequeños, sintéticos y escritos por el mismo autor de las reglas
 ```bash
 pip install -e ".[dev]"
 pytest
-python eval/evaluar.py eval/casos_v4_ciego.jsonl
+python eval/evaluar.py eval/casos_v5_ciego.jsonl
+python eval/evaluar_roles.py
 python scripts/generar_criterios_md.py   # regenera CRITERIOS.md desde el código
 ```
 

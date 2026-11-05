@@ -1,7 +1,7 @@
 """Línea de comandos de Alómetro.
 
     alometro demo                     # genera datos sintéticos y un informe de ejemplo
-    alometro evaluar datos.jsonl -o informe.html --json resultados.json --csv resultados.csv
+    alometro evaluar datos.jsonl -o informe.html --json resultados.json --csv resultados.csv --coaching coaching.csv
     alometro comparar antes.jsonl despues.jsonl
     alometro calibrar datos.jsonl etiquetas_humanas.csv
     alometro criterios                # imprime la rúbrica
@@ -19,10 +19,12 @@ from pathlib import Path
 from . import __version__
 from .calibracion import calibrar, leer_etiquetas
 from .cargar import a_jsonl, cargar
+from .coaching import coaching_csv
 from .estadistica import tamano_muestra
 from .indicadores import calcular, comparar
 from .informe import generar_html, resumen_json
 from .motor import Politica, evaluar_lote
+from .roles import leer_mapa
 from .rubrica import CRITERIOS, DIMENSIONES
 from .sintetico import generar
 
@@ -82,8 +84,20 @@ def _imprimir_resumen(res: dict) -> None:
         print(f"{i.nombre[:42]:42s} {v:>9s} {m:>10s}  {est}  (n={i.n})")
 
 
+def _cargar(a, ruta):
+    convs = cargar(ruta, leer_mapa(getattr(a, "roles", None)))
+    inferidas = [c for c in convs if c.metadatos.get("roles_inferidos")]
+    dudosas = [c.id for c in inferidas if c.metadatos["roles_inferidos"].get("_confianza") == "baja"]
+    if inferidas:
+        print(f"Roles inferidos en {len(inferidas)} conversaciones con hablantes sin rol (p. ej. SPEAKER_00).", file=sys.stderr)
+    if dudosas:
+        print(f"Aviso: inferencia de roles con confianza baja en {len(dudosas)}: {', '.join(dudosas[:10])}. "
+              "Revíselas o fije los roles con --roles SPEAKER_00=agente,SPEAKER_01=cliente.", file=sys.stderr)
+    return convs
+
+
 def cmd_evaluar(a) -> int:
-    convs = cargar(a.entrada)
+    convs = _cargar(a, a.entrada)
     if not convs:
         print("No se encontraron conversaciones.", file=sys.stderr)
         return 1
@@ -103,8 +117,11 @@ def cmd_evaluar(a) -> int:
         Path(a.json).write_text(resumen_json(evs, res), encoding="utf-8")
     if a.csv:
         Path(a.csv).write_text(_csv(evs), encoding="utf-8")
+    if a.coaching:
+        Path(a.coaching).write_text(coaching_csv(res["coaching"]), encoding="utf-8")
     _imprimir_resumen(res)
-    print(f"\nInforme: {salida_html}" + (f" · JSON: {a.json}" if a.json else "") + (f" · CSV: {a.csv}" if a.csv else ""))
+    print(f"\nInforme: {salida_html}" + (f" · JSON: {a.json}" if a.json else "") + (f" · CSV: {a.csv}" if a.csv else "")
+          + (f" · Coaching: {a.coaching}" if a.coaching else ""))
     if len(evs) < 100:
         print(f"Aviso: con {len(evs)} interacciones los porcentajes son poco precisos; "
               f"para ±5 puntos se necesitan unas {tamano_muestra()} por periodo.")
@@ -113,7 +130,7 @@ def cmd_evaluar(a) -> int:
 
 def cmd_comparar(a) -> int:
     pol = _politica(a)
-    antes, despues = evaluar_lote(cargar(a.antes), pol), evaluar_lote(cargar(a.despues), pol)
+    antes, despues = evaluar_lote(_cargar(a, a.antes), pol), evaluar_lote(_cargar(a, a.despues), pol)
     filas = comparar(antes, despues, alfa=a.alfa)
     print(f"\nAntes: {len(antes)} interacciones · Después: {len(despues)} interacciones\n")
     print(f"{'Indicador':40s} {'Antes':>9s} {'Después':>9s} {'Cambio':>9s} {'p':>7s}  Veredicto")
@@ -131,7 +148,7 @@ def cmd_comparar(a) -> int:
 
 
 def cmd_calibrar(a) -> int:
-    convs = cargar(a.entrada)
+    convs = _cargar(a, a.entrada)
     evs = evaluar_lote(convs, _politica(a))
     etiquetas = leer_etiquetas(Path(a.etiquetas).read_text(encoding="utf-8-sig"))
     csat = {c.id: c.csat for c in convs if c.csat is not None}
@@ -183,13 +200,15 @@ def main(argv=None) -> int:
     def comunes(sp):
         sp.add_argument("--no-anular", action="store_true", help="no poner la nota en 0 cuando hay error crítico")
         sp.add_argument("--sin-anonimizar", action="store_true", help="mostrar las evidencias sin anonimizar")
+        sp.add_argument("--roles", help="roles de hablantes sin nombre, p. ej. SPEAKER_00=agente,SPEAKER_01=cliente (si no, se infieren)")
         sp.add_argument("--config", help="JSON de la operación: pesos, desactivar, metas, anular_por_critico, dias_recontacto")
 
     e = sub.add_parser("evaluar", help="evaluar conversaciones y generar el informe")
-    e.add_argument("entrada", help="archivo .jsonl/.json/.csv/.txt o carpeta")
+    e.add_argument("entrada", help="archivo .jsonl/.json/.csv/.txt/.srt/.vtt o carpeta")
     e.add_argument("-o", "--salida", help="informe HTML (por defecto informe_alometro.html)")
     e.add_argument("--json", help="guardar resultados completos en JSON")
     e.add_argument("--csv", help="guardar una fila por interacción en CSV")
+    e.add_argument("--coaching", help="guardar el plan de coaching por agente en CSV")
     e.add_argument("--dias-recontacto", type=int, default=7)
     comunes(e)
     e.set_defaults(f=cmd_evaluar)

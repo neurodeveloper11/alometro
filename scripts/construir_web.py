@@ -17,6 +17,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RAIZ / "src"))
 from alometro import __version__  # noqa: E402
 from alometro.calendario import HORA_COLOMBIA  # noqa: E402
+from alometro.coaching import plan_coaching  # noqa: E402
 from alometro.indicadores import INDICADORES, calcular, comparar  # noqa: E402
 from alometro.motor import evaluar, evaluar_lote  # noqa: E402
 from alometro.rubrica import CRITERIOS, DIMENSIONES  # noqa: E402
@@ -90,6 +91,7 @@ def datos():
         "ejemplos": ejemplos,
         "comparacion": comp, "n_antes": len(ea), "n_despues": len(ed),
         "contencion": {"antes": ra["contencion"], "despues": rd["contencion"]},
+        "coaching": [p for p in plan_coaching(ea) if p["prioridades"]][:3],
         "evaluacion": json.loads((RAIZ / "eval" / "historial.json").read_text(encoding="utf-8")),
         "archivos_py": sorted(p.name for p in (RAIZ / "src" / "alometro").glob("*.py")),
     }

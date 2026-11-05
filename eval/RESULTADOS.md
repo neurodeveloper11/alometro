@@ -20,10 +20,25 @@ en cancelación, aceptación de venta, amenaza de queja externa, conversación s
 | v1 | 30 | 48 | 0,77 | línea base, antes de ajustar |
 | v2 ciego | 29 | 40 | 0,65 | tras ajustar con v1 |
 | v3 ciego | 31 | 40 | 0,70 | tras las revisiones 1 y 2 |
-| **v4 ciego** | 22 | 30 | **0,87** | tras ajustar con v3 — **cifra vigente** |
+| v4 ciego | 22 | 30 | 0,87 | tras ajustar con v3 |
+| **v5 ciego** | 16 | 20 | **0,75** | antes de la mejora de negaciones; los 5 errores eran negaciones — **última medición** |
 
-Después de cada medición se corrigieron los errores; hoy los cuatro conjuntos pasan al 100 %, pero esa cifra **no** mide
-la generalización (ya se vieron los casos). La próxima estimación honesta requiere un conjunto v5 nuevo.
+Después de cada medición se corrigieron los errores; hoy los cinco conjuntos pasan al 100 %, pero esa cifra **no** mide
+la generalización (ya se vieron los casos). La próxima estimación honesta requiere un conjunto v6 nuevo.
+
+## Negaciones (revisión 5)
+
+Una coincidencia se descarta si justo antes hay un negador («no», «nunca», «ni», «ningún»…) separado solo por palabras de
+enlace («voy a», «estoy», «le»…) y sin cortes de frase. Así «no necesito un asesor» o «no voy a poner ninguna queja» no cuentan,
+pero «el bot no entiende, páseme con un asesor» sí. Se aplica a petición de humano, frustración, amenazas, quejas, coerción,
+aceptación de venta y ofertas de retención.
+
+## Inferencia de roles en transcripciones con hablantes anónimos
+
+`python eval/evaluar_roles.py` reemplaza los roles por SPEAKER_00/SPEAKER_01 al azar y mide si se recupera el agente:
+1,00 en 256 conversaciones sintéticas completas; 0,91 en 68 fragmentos escritos a mano (2-6 turnos, muchos sin saludo),
+que también se usaron para ajustar las pistas. Las llamadas reales, con saludo y presentación, son el caso fácil;
+los fragmentos sin saludo, el difícil. Con confianza baja la CLI avisa y se pueden fijar con `--roles`.
 
 ## Limitaciones conocidas
 

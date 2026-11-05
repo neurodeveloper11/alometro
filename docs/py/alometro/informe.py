@@ -138,6 +138,32 @@ def generar_html(evs: list[Evaluacion], resumen: dict, titulo: str = "Informe Al
                       "Un 25 % o más de interacciones hostiles es una demanda emocional alta: considere pausas de recuperación y acompañamiento "
                       "(la batería de riesgo psicosocial, Res. 2764 de 2022, evalúa las demandas emocionales).</p></div>")
 
+    # --- Coaching ---
+    planes = [p for p in resumen.get("coaching", []) if p["prioridades"]]
+    if planes:
+        partes.append("<h2>Plan de coaching por agente</h2><p class='sub'>Prioridades de entrenamiento de cada agente, frente al promedio del equipo, "
+                      "con un ejemplo real para la sesión uno a uno. «Proceso» significa que todo el equipo falla igual: "
+                      "corrija el guion, el sistema o la política antes que a la persona.</p><div class='grid' id='coaching'>")
+        for p in planes[:24]:
+            filas = []
+            for i, c in enumerate(p["prioridades"], 1):
+                ej = c["ejemplo"] or {}
+                if ej.get("cita"):
+                    cita = f"<div class='ev'><em>{E(ej.get('conversacion_id', ''))} · turno {ej.get('turno') or '—'}:</em> «{E(ej['cita'])}»</div>"
+                elif ej:
+                    cita = f"<div class='ev'><em>{E(ej.get('conversacion_id', ''))}:</em> {E(ej.get('detalle', ''))}</div>"
+                else:
+                    cita = ""
+                origen = "<span class='chip'>proceso</span>" if c["origen"] == "proceso" else ""
+                crit = " <span class='crit'>crítico</span>" if c["critico"] else ""
+                filas.append(f"<div style='margin-top:10px'><b>{i}. {E(c['criterio'])}</b> {E(c['nombre'])}{crit} {origen}"
+                             f"<div class='muted'>Falla en {c['fallas']} de {c['aplica']} ({_pct(c['tasa'])}) · equipo {_pct(c['tasa_equipo'])}</div>"
+                             f"<div>{E(c['recomendacion'])}</div>{cita}</div>")
+            fort = ", ".join(f"{E(f['criterio'])} {E(f['nombre'])}" for f in p["fortalezas"]) or "—"
+            partes.append(f"<div class='card'><h3>{E(p['agente_id'])} <span class='muted' style='font-weight:400'>· {p['interacciones']} interacciones · "
+                          f"puntaje {p['puntaje_promedio']}</span></h3>{''.join(filas)}<div class='muted' style='margin-top:10px'>Fortalezas: {fort}</div></div>")
+        partes.append("</div>")
+
     # --- Ley 2300 ---
     if resumen["ley_2300_frecuencia"]:
         partes.append("<h2>Alertas de frecuencia de contacto (Ley 2300 de 2023)</h2><div class='card wrap'><table><tr><th>Cliente</th><th>Regla</th><th>Detalle</th></tr>")
